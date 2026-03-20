@@ -48,6 +48,8 @@ export default function Wellspring() {
   const [loading, setLoading] = useState(true);
   const [confetti, setConfetti] = useState([]);
   const [heroAnimDone, setHeroAnimDone] = useState(false);
+  const [myWishes, setMyWishes] = useState(() => JSON.parse(localStorage.getItem('myWishes') || '[]'));
+  const [editingCardId, setEditingCardId] = useState(null);
   const fileInputRef = useRef(null);
 
   // Load cards from Firestore
@@ -83,24 +85,39 @@ export default function Wellspring() {
     if (!authorName.trim()) return;
     if (!message.trim() && !selectedImage && !selectedGif && !selectedSticker) return;
 
-    const newCard = {
-      author: authorName.trim(),
-      message: message.trim(),
-      image: selectedImage,
-      gif: selectedGif,
-      sticker: selectedSticker,
-      reactions: {},
-      bg: CARD_COLORS[Math.floor(Math.random() * CARD_COLORS.length)],
-      createdAt: Date.now(),
-    };
-
     try {
-      await addDoc(collection(db, "wishes"), newCard);
+      if (editingCardId) {
+        const updateData = {
+          author: authorName.trim(),
+          message: message.trim(),
+          image: selectedImage,
+          gif: selectedGif,
+          sticker: selectedSticker,
+        };
+        await updateDoc(doc(db, "wishes", editingCardId), updateData);
+      } else {
+        const newCard = {
+          author: authorName.trim(),
+          message: message.trim(),
+          image: selectedImage,
+          gif: selectedGif,
+          sticker: selectedSticker,
+          reactions: {},
+          bg: CARD_COLORS[Math.floor(Math.random() * CARD_COLORS.length)],
+          createdAt: Date.now(),
+        };
+        const docRef = await addDoc(collection(db, "wishes"), newCard);
+        
+        const newMyWishes = [...myWishes, docRef.id];
+        setMyWishes(newMyWishes);
+        localStorage.setItem("myWishes", JSON.stringify(newMyWishes));
+      }
+
       setShowAddModal(false);
       resetForm();
-      launchConfetti();
+      if (!editingCardId) launchConfetti();
     } catch (e) {
-      console.error("Error adding document: ", e);
+      console.error("Error saving document: ", e);
       alert("Uh oh, the post failed to save. Error: " + e.message);
     }
   };
@@ -112,6 +129,21 @@ export default function Wellspring() {
     setSelectedGif(null);
     setSelectedSticker(null);
     setActiveTab("message");
+    setEditingCardId(null);
+  };
+
+  const handleEditClick = (card) => {
+    setEditingCardId(card.id);
+    setAuthorName(card.author);
+    setMessage(card.message || "");
+    setSelectedImage(card.image || null);
+    setSelectedGif(card.gif || null);
+    setSelectedSticker(card.sticker || null);
+    if (card.image) setActiveTab("photo");
+    else if (card.gif) setActiveTab("gif");
+    else if (card.sticker) setActiveTab("sticker");
+    else setActiveTab("message");
+    setShowAddModal(true);
   };
 
   const handleReaction = async (cardId, emoji) => {
@@ -259,13 +291,14 @@ export default function Wellspring() {
 
         .modal-content { animation: modalIn 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
 
-        .delete-btn {
+        .card-controls {
           opacity: 0;
           transition: opacity 0.2s;
         }
-        .card-wrapper:hover .delete-btn {
+        .card-wrapper:hover .card-controls {
           opacity: 1;
         }
+        .control-btn:hover { background: rgba(0,0,0,0.15) !important; color: #333 !important; }
 
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -353,15 +386,27 @@ export default function Wellspring() {
               className="card-item card-wrapper"
               style={{ ...styles.card, background: card.bg, animationDelay: `${i * 0.08}s` }}
             >
-              {/* Delete button */}
-              <button
-                className="delete-btn"
-                onClick={() => handleDeleteCard(card.id)}
-                style={styles.deleteBtn}
-                title="Remove"
-              >
-                ×
-              </button>
+              {/* Edit / Delete buttons */}
+              {myWishes.includes(card.id) && (
+                <div className="card-controls" style={styles.cardControls}>
+                  <button
+                    className="control-btn"
+                    onClick={() => handleEditClick(card)}
+                    style={styles.controlBtn}
+                    title="Edit"
+                  >
+                    ✎
+                  </button>
+                  <button
+                    className="control-btn"
+                    onClick={() => handleDeleteCard(card.id)}
+                    style={styles.controlBtn}
+                    title="Remove"
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
 
               {card.sticker && (
                 <div style={styles.cardSticker}>{card.sticker}</div>
@@ -413,7 +458,7 @@ export default function Wellspring() {
         >
           <div className="modal-content" style={styles.modal}>
             <div style={styles.modalHeader}>
-              <h2 style={styles.modalTitle}>Add Your Wish ✨</h2>
+              <h2 style={styles.modalTitle}>{editingCardId ? "Edit Your Wish ✨" : "Add Your Wish ✨"}</h2>
               <button style={styles.closeBtn} onClick={() => { setShowAddModal(false); resetForm(); }}>×</button>
             </div>
 
@@ -580,7 +625,7 @@ export default function Wellspring() {
               onClick={handleAddCard}
               disabled={!authorName.trim() || (!message.trim() && !selectedImage && !selectedGif && !selectedSticker)}
             >
-              🎉 Post Birthday Wish
+              {editingCardId ? "💾 Save Changes" : "🎉 Post Birthday Wish"}
             </button>
           </div>
         </div>
@@ -707,23 +752,27 @@ const styles = {
     cursor: "default",
     overflow: "hidden",
   },
-  deleteBtn: {
+  cardControls: {
     position: "absolute",
     top: 8,
     right: 10,
-    width: 26,
-    height: 26,
+    display: "flex",
+    gap: 6,
+    zIndex: 3,
+  },
+  controlBtn: {
+    width: 28,
+    height: 28,
     borderRadius: "50%",
     border: "none",
     background: "rgba(0,0,0,0.08)",
-    color: "#999",
-    fontSize: 18,
+    color: "#888",
+    fontSize: 15,
     cursor: "pointer",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     transition: "all 0.2s",
-    zIndex: 3,
     lineHeight: 1,
   },
   cardSticker: {
