@@ -101,6 +101,7 @@ export default function Wellspring() {
       launchConfetti();
     } catch (e) {
       console.error("Error adding document: ", e);
+      alert("Uh oh, the post failed to save. Error: " + e.message);
     }
   };
 
@@ -130,8 +131,49 @@ export default function Wellspring() {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    
     const reader = new FileReader();
-    reader.onload = (ev) => setSelectedImage(ev.target.result);
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+        
+        // Maximum dimensions to keep file size small
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+        
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width = Math.round((width * MAX_HEIGHT) / height);
+            height = MAX_HEIGHT;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Compress as JPEG with 70% quality
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+        
+        // Check if it's still bigger than Firestore's ~1MB limit
+        if (dataUrl.length > 1000000) {
+          alert("Image is still too large after compression. Please choose a smaller photo.");
+          return;
+        }
+        
+        setSelectedImage(dataUrl);
+      };
+      img.src = ev.target.result;
+    };
     reader.readAsDataURL(file);
   };
 
