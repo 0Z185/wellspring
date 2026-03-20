@@ -894,12 +894,16 @@ const styles = {
     overflow: "hidden",
     marginBottom: 14,
     boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
+    background: "rgba(0,0,0,0.05)", // Soft background for contained images
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
   cardImage: {
     width: "100%",
     display: "block",
-    maxHeight: 220,
-    objectFit: "cover",
+    maxHeight: 420, // Increased from 220
+    objectFit: "contain", // Switch from cover to contain to show full image
   },
   cardMessage: {
     fontSize: 15,
