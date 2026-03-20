@@ -360,6 +360,29 @@ export default function Wellspring() {
           pointer-events: none;
         }
 
+        .masonry-grid {
+          column-count: 3;
+          column-gap: 20px;
+          width: 100%;
+          max-width: 1100px;
+          margin: 0 auto;
+          padding: 0 24px 40px;
+        }
+
+        @media (max-width: 900px) {
+          .masonry-grid { column-count: 2; }
+        }
+        @media (max-width: 600px) {
+          .masonry-grid { column-count: 1; }
+        }
+
+        .masonry-item {
+          break-inside: avoid;
+          margin-bottom: 20px;
+          display: inline-block;
+          width: 100%;
+        }
+
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
@@ -471,11 +494,11 @@ export default function Wellspring() {
           <p style={styles.emptySub}>Be the first to add a birthday wish for Omoye Zindzi.</p>
         </div>
       ) : (
-        <div style={styles.grid}>
+        <div className="masonry-grid">
           {cards.map((card, i) => (
             <div
               key={card.id}
-              className="card-item card-wrapper"
+              className="card-item card-wrapper masonry-item"
               style={{ ...styles.card, background: card.bg, animationDelay: `${i * 0.08}s` }}
             >
               {/* Edit / Delete buttons */}
@@ -841,12 +864,7 @@ const styles = {
     position: "relative",
   },
   grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-    gap: 20,
-    padding: "0 24px 40px",
-    maxWidth: 1100,
-    margin: "0 auto",
+    // Legacy styles, now handled by .masonry-grid class
   },
   card: {
     borderRadius: 22,
@@ -860,6 +878,8 @@ const styles = {
     cursor: "default",
     overflow: "hidden",
     zIndex: 2,
+    display: "inline-block", // Required for masonry
+    width: "100%", // Required for masonry
   },
   cardControls: {
     position: "absolute",
