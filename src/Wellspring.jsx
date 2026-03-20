@@ -801,7 +801,8 @@ const styles = {
     WebkitTextFillColor: "transparent",
     animation: "shimmer 4s linear infinite",
     marginTop: 4,
-    lineHeight: 1.2,
+    lineHeight: 1.5, // Increased from 1.2 to prevent clipping
+    paddingBottom: "10px", // Extra space for descenders
     textShadow: "2px 2px 15px rgba(80,200,120,0.3)",
     display: "inline-block",
   },
