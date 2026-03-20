@@ -50,7 +50,30 @@ export default function Wellspring() {
   const [heroAnimDone, setHeroAnimDone] = useState(false);
   const [myWishes, setMyWishes] = useState(() => JSON.parse(localStorage.getItem('myWishes') || '[]'));
   const [editingCardId, setEditingCardId] = useState(null);
+  const [backgroundDecor, setBackgroundDecor] = useState({ bokeh: [], sparkles: [] });
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    const bokehColors = ["rgba(255, 223, 153, 0.3)", "rgba(80, 200, 120, 0.2)", "rgba(212, 122, 144, 0.25)", "rgba(128, 0, 32, 0.15)"];
+    const bokeh = Array.from({ length: 6 }, (_, i) => ({
+      id: i,
+      size: 150 + Math.random() * 250,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      color: bokehColors[i % bokehColors.length],
+      duration: 15 + Math.random() * 20,
+      delay: Math.random() * -20,
+    }));
+    const sparkles = Array.from({ length: 20 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: 2 + Math.random() * 3,
+      duration: 2 + Math.random() * 3,
+      delay: Math.random() * 5,
+    }));
+    setBackgroundDecor({ bokeh, sparkles });
+  }, []);
 
   // Load cards from Firestore
   useEffect(() => {
@@ -257,6 +280,16 @@ export default function Wellspring() {
           from { opacity: 0; transform: translateY(20px) scale(0.97); }
           to { opacity: 1; transform: translateY(0) scale(1); }
         }
+        @keyframes bokehDrift {
+          0% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(30px, 50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0, 0) scale(1); }
+        }
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.3; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.3); }
+        }
 
         .hero-section {
           animation: heroSlide 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
@@ -300,6 +333,33 @@ export default function Wellspring() {
         }
         .control-btn:hover { background: rgba(0,0,0,0.15) !important; color: #333 !important; }
 
+        .bokeh-blob {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(60px);
+          z-index: 1;
+          pointer-events: none;
+        }
+
+        .sparkle-dot {
+          position: absolute;
+          background: white;
+          border-radius: 50%;
+          box-shadow: 0 0 10px rgba(255,255,255,0.8);
+          z-index: 1;
+          pointer-events: none;
+        }
+
+        .bg-pattern {
+          position: fixed;
+          inset: 0;
+          background-image: radial-gradient(#000 0.5px, transparent 0.5px);
+          background-size: 30px 30px;
+          opacity: 0.03;
+          z-index: 1;
+          pointer-events: none;
+        }
+
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
@@ -324,18 +384,50 @@ export default function Wellspring() {
         />
       ))}
 
+      {/* Custom Background Elements */}
+      <div className="bg-pattern" />
+      <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
+        {backgroundDecor.bokeh.map(b => (
+          <div
+            key={b.id}
+            className="bokeh-blob"
+            style={{
+              width: b.size,
+              height: b.size,
+              left: `${b.x}%`,
+              top: `${b.y}%`,
+              background: b.color,
+              animation: `bokehDrift ${b.duration}s ${b.delay}s ease-in-out infinite`,
+            }}
+          />
+        ))}
+        {backgroundDecor.sparkles.map(s => (
+          <div
+            key={s.id}
+            className="sparkle-dot"
+            style={{
+              width: s.size,
+              height: s.size,
+              left: `${s.x}%`,
+              top: `${s.y}%`,
+              animation: `twinkle ${s.duration}s ${s.delay}s ease-in-out infinite`,
+            }}
+          />
+        ))}
+      </div>
+
       {/* Floating decorative elements */}
-      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, pointerEvents: "none", overflow: "hidden", zIndex: 0 }}>
-        {["🎈", "🎁", "✨", "🎂", "💖", "🎊"].map((emoji, i) => (
+      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, pointerEvents: "none", overflow: "hidden", zIndex: 1 }}>
+        {["🎈", "🎁", "✨", "🎂", "💖", "🎊", "🥳", "🌟", "🎇", "🪄"].map((emoji, i) => (
           <div
             key={i}
             style={{
               position: "absolute",
-              fontSize: 20 + Math.random() * 16,
-              top: `${10 + Math.random() * 80}%`,
-              left: `${5 + Math.random() * 90}%`,
-              animation: `float ${3 + Math.random() * 3}s ${Math.random() * 2}s ease-in-out infinite`,
-              opacity: 0.15,
+              fontSize: 24 + Math.random() * 20,
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              animation: `float ${4 + Math.random() * 4}s ${Math.random() * 2}s ease-in-out infinite`,
+              opacity: 0.12,
             }}
           >
             {emoji}
@@ -641,7 +733,14 @@ export default function Wellspring() {
 const styles = {
   root: {
     minHeight: "100vh",
-    background: "linear-gradient(180deg, #FFFDF5 0%, #FDF7EC 30%, #F4FAF6 70%, #FAF0F2 100%)",
+    background: `
+      radial-gradient(at 0% 0%, rgba(255, 223, 153, 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(80, 200, 120, 0.12) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(212, 122, 144, 0.15) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, rgba(128, 0, 32, 0.08) 0px, transparent 50%),
+      linear-gradient(180deg, #FFFDF5 0%, #FDF7EC 100%)
+    `,
+    backgroundAttachment: "fixed",
     fontFamily: "'DM Sans', sans-serif",
     position: "relative",
     overflow: "hidden",
@@ -743,14 +842,17 @@ const styles = {
     margin: "0 auto",
   },
   card: {
-    borderRadius: 18,
+    borderRadius: 22,
     padding: 24,
     position: "relative",
-    border: "1px solid rgba(255,255,255,0.6)",
-    boxShadow: "0 2px 16px rgba(0,0,0,0.04), 0 1px 4px rgba(0,0,0,0.02)",
-    transition: "transform 0.3s, box-shadow 0.3s",
+    background: "rgba(255, 255, 255, 0.7)",
+    backdropFilter: "blur(12px)",
+    border: "1px solid rgba(255, 255, 255, 0.8)",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.02)",
+    transition: "all 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
     cursor: "default",
     overflow: "hidden",
+    zIndex: 2,
   },
   cardControls: {
     position: "absolute",
