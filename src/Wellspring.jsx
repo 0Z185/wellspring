@@ -43,7 +43,8 @@ const CARD_COLORS = [
 ];
 
 const CanvasGrain = () => (
-  <svg style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", opacity: 0.07, pointerEvents: "none", zIndex: 1 }}>
+  <svg style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", opacity: 0.05, pointerEvents: "none", zIndex: 1 }}>
+    {/* Reduced from 0.07 to 0.05 for mobile performance */}
     <filter id="noiseFilter">
       <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch" />
     </filter>
@@ -442,7 +443,14 @@ export default function Wellspring() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Delius+Swash+Caps&family=Delius&family=Lexend:wght@300;400;500;600;700&family=Quicksand:ital,wght@0,300;0,400;0,700;1,400&family=Ultra&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@400;500;600;700&display=swap');
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { 
+          box-sizing: border-box; 
+          margin: 0; 
+          padding: 0; 
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        body { overflow-x: hidden; width: 100%; }
 
         @keyframes float {
           0%, 100% { transform: translateY(0) rotate(0deg); }
@@ -514,9 +522,18 @@ export default function Wellspring() {
           opacity: 0;
         }
 
+        .add-btn { 
+          min-height: 48px;
+        }
+
         .add-btn:hover {
           transform: scale(1.05) !important;
           box-shadow: 0 8px 30px rgba(128, 0, 32, 0.4) !important;
+        }
+
+        .reaction-btn {
+          min-height: 32px;
+          min-width: 44px;
         }
 
         .reaction-btn:hover {
@@ -533,10 +550,16 @@ export default function Wellspring() {
 
         .tab-btn:hover { background: rgba(80,200,120,0.15) !important; }
 
-        .modal-overlay { animation: fadeIn 0.25s ease; }
+        .modal-overlay { 
+          animation: fadeIn 0.25s ease; 
+          position: fixed !important;
+        }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .modal-content { animation: modalIn 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+        .modal-content { 
+          animation: modalIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+          overflow-y: auto !important;
+        }
 
         .card-controls {
           opacity: 0;
@@ -576,7 +599,7 @@ export default function Wellspring() {
 
         .cards-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
           gap: 32px;
           width: 100%;
           max-width: 1100px;
@@ -594,6 +617,7 @@ export default function Wellspring() {
           justify-content: center;
           cursor: zoom-out;
           animation: fadeIn 0.3s ease forwards;
+          padding: 16px;
         }
         .lightbox-content {
           max-width: 90vw;
@@ -606,8 +630,8 @@ export default function Wellspring() {
           position: absolute;
           top: 24px;
           right: 24px;
-          width: 40px;
-          height: 40px;
+          width: 44px;
+          height: 44px;
           border-radius: 50%;
           background: rgba(255,255,255,0.1);
           color: white;
@@ -618,9 +642,57 @@ export default function Wellspring() {
           align-items: center;
           justify-content: center;
           transition: background 0.2s;
+          z-index: 10001;
         }
         .lightbox-close:hover {
           background: rgba(255,255,255,0.2);
+        }
+
+        /* Responsive Overrides */
+        @media (max-width: 640px) {
+          .hero-section { padding: 40px 16px 24px !important; }
+          .cards-grid { padding: 0 16px 40px; gap: 24px; }
+          .card-item { 
+            padding: 22px 18px 16px !important; 
+            transform: none !important;
+          }
+          .add-btn { 
+            padding: 12px 28px !important; 
+            font-size: 11px !important; 
+            min-height: 44px;
+          }
+          .modal-overlay { padding: 12px !important; }
+          .modal-content { 
+            padding: 24px 20px 22px !important; 
+            max-height: 95vh !important;
+          }
+          .reaction-btn { 
+            padding: 6px 10px !important; 
+            font-size: 12px !important;
+          }
+          .gif-grid { gap: 4px !important; }
+          .sticker-grid { gap: 4px !important; }
+          .close-btn { width: 44px !important; height: 44px !important; }
+          .lightbox-close { 
+            top: 16px; 
+            right: 16px; 
+            background: rgba(255,255,255,0.15); 
+          }
+          .lightbox-content { max-width: 94vw; }
+          
+          /* Canvas grain opacity reduced for performance */
+          svg > rect[filter="url(#noiseFilter)"] { opacity: 0.5; }
+        }
+
+        @media (max-width: 380px) {
+          .hero-section { padding: 32px 12px 20px !important; }
+          .cards-grid { padding: 0 12px 32px; gap: 20px; }
+          .card-item { padding: 18px 14px 14px !important; }
+          .modal-content { padding: 20px 16px 18px !important; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          svg[style*="noiseFilter"] { display: none; }
         }
 
         ::-webkit-scrollbar { width: 6px; }
@@ -659,7 +731,7 @@ export default function Wellspring() {
 
       {/* Hero Section */}
       <div className="hero-section" style={styles.hero}>
-        <div style={styles.heroInner}>
+        <div className="hero-inner" style={styles.heroInner}>
           <div style={styles.heroPreTitle}>✦ A CELEBRATION ✦</div>
           <div style={styles.heroTitleWrapper}>
             <svg style={styles.heroBrush} viewBox="0 0 400 60" preserveAspectRatio="none">
@@ -779,7 +851,7 @@ export default function Wellspring() {
           onClick={(e) => e.target === e.currentTarget && (setShowAddModal(false), resetForm())}
         >
           <div className="modal-content" style={styles.modal}>
-            <button style={styles.closeBtn} onClick={() => { setShowAddModal(false); resetForm(); }}>✕</button>
+            <button className="close-btn" style={styles.closeBtn} onClick={() => { setShowAddModal(false); resetForm(); }}>✕</button>
             <div style={styles.modalHeader}>
               <h2 style={styles.modalTitle}>{editingCardId ? "Refine Your Mark" : "Leave Your Mark"}</h2>
             </div>
@@ -861,7 +933,7 @@ export default function Wellspring() {
 
               {activeTab === "gif" && (
                 <div>
-                  <div style={styles.gifGrid}>
+                  <div className="gif-grid" style={styles.gifGrid}>
                     {GIPHY_SUGGESTIONS.map((url, i) => (
                       <div
                         key={i}
@@ -888,7 +960,7 @@ export default function Wellspring() {
 
               {activeTab === "sticker" && (
                 <div>
-                  <div style={styles.stickerGrid}>
+                  <div className="sticker-grid" style={styles.stickerGrid}>
                     {STICKERS.map((s, i) => (
                       <button
                         key={i}
