@@ -489,8 +489,8 @@ export default function Wellspring() {
           100% { transform: translate(0, 0) scale(1); }
         }
         @keyframes twinkle {
-          0%, 100% { opacity: 0.3; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.3); }
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 1; }
         }
         @keyframes starGlow {
           0%, 100% { opacity: 0.5; }
