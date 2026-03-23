@@ -23,18 +23,150 @@ const REACTIONS = [
   { emoji: "🔥", label: "Fire" },
 ];
 
+const PALETTE = {
+  bg: ["#F5E4E8", "#E8DDF2", "#F5E4E8", "#F0E8F2"],
+  purple: "#6B4C8A",
+  coral: "#E87B5A",
+  blue: "#4A7AB5",
+  orange: "#E8954B",
+  magenta: "#C44B7A",
+  green: "#5CA86B",
+  yellow: "#E8C84B",
+  lilac: "#C9B8D9",
+  text: "#1E1E2E",
+  textMid: "#4A4060",
+  textLight: "#8A7A9A",
+};
+
 const CARD_COLORS = [
-  "linear-gradient(135deg, #FFF2CC 0%, #FFDF99 100%)",
-  "linear-gradient(135deg, #FFF5E6 0%, #FFE699 100%)",
-  "linear-gradient(135deg, #E6F7EB 0%, #A8E4BC 100%)",
-  "linear-gradient(135deg, #F2D2DA 0%, #D47A90 100%)",
-  "linear-gradient(135deg, #FFDF99 0%, #FFD700 100%)",
-  "linear-gradient(135deg, #FFE699 0%, #FFBF00 100%)",
-  "linear-gradient(135deg, #A8E4BC 0%, #50C878 100%)",
-  "linear-gradient(135deg, #D47A90 0%, #800020 100%)",
+  "#FFFBFD", "#FAF5FF", "#FFF7F4", "#F5F8FF", "#FFF9F0", "#F8F5FF", "#FFF5F8", "#F5FAFF"
 ];
 
+const CanvasGrain = () => (
+  <svg style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", opacity: 0.05, pointerEvents: "none", zIndex: 1 }}>
+    <filter id="noiseFilter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#noiseFilter)" />
+  </svg>
+);
+
+const WatercolourSplatters = () => {
+  const colors = [PALETTE.coral, PALETTE.blue, PALETTE.purple, PALETTE.magenta, PALETTE.orange];
+  return (
+    <svg style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 1 }}>
+      <defs>
+        <filter id="distort">
+          <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" result="turb" />
+          <feDisplacementMap in="SourceGraphic" in2="turb" scale="8" />
+          <feGaussianBlur stdDeviation="1.5" />
+        </filter>
+      </defs>
+      {[...Array(5)].map((_, i) => (
+        <g key={i} filter="url(#distort)" style={{ opacity: 0.04 }}>
+          {[...Array(8)].map((__, j) => (
+            <ellipse
+              key={j}
+              cx={`${10 + Math.random() * 80}%`}
+              cy={`${10 + Math.random() * 80}%`}
+              rx={20 + Math.random() * 60}
+              ry={20 + Math.random() * 60}
+              fill={colors[Math.floor(Math.random() * colors.length)]}
+              transform={`rotate(${Math.random() * 360})`}
+            />
+          ))}
+        </g>
+      ))}
+    </svg>
+  );
+};
+
+const BrushStrokes = () => (
+  <svg style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", opacity: 0.04, pointerEvents: "none", zIndex: 1 }}>
+    <filter id="roughen">
+      <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="3" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" />
+    </filter>
+    <path d="M-50,200 Q200,50 500,300 T1200,100" stroke={PALETTE.coral} strokeWidth="60" fill="none" strokeLinecap="round" filter="url(#roughen)" transform="rotate(-5 600 200)" />
+    <path d="M1300,800 Q1000,950 600,700 T-100,900" stroke={PALETTE.blue} strokeWidth="50" fill="none" strokeLinecap="round" filter="url(#roughen)" transform="rotate(10 600 800)" />
+    <path d="M200,1000 Q500,800 1100,1100" stroke={PALETTE.purple} strokeWidth="40" fill="none" strokeLinecap="round" filter="url(#roughen)" />
+  </svg>
+);
+
+const SketchyMarks = () => (
+  <svg style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", opacity: 0.06, pointerEvents: "none", zIndex: 1 }}>
+    <circle cx="15%" cy="25%" r="40" fill="none" stroke="#2E3A5C" strokeWidth="1" strokeDasharray="4 4" transform="rotate(15 15% 25%)" />
+    <path d="M85% 65% L92% 75% M87% 75% L94% 65%" stroke={PALETTE.purple} strokeWidth="1.5" strokeDasharray="3 2" />
+    <path d="M5% 85% C 15 85, 25 95, 35 85" stroke="#2E3A5C" strokeWidth="1" fill="none" transform="rotate(-10 5% 85%)" />
+  </svg>
+);
+
+const ConfettiDots = () => {
+  const colors = [PALETTE.coral, PALETTE.blue, PALETTE.purple, PALETTE.magenta, PALETTE.orange, PALETTE.green, PALETTE.yellow];
+  return (
+    <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 1 }}>
+      {[...Array(20)].map((_, i) => (
+        <div
+          key={i}
+          style={{
+            position: "absolute",
+            width: 6 + Math.random() * 8,
+            height: 6 + Math.random() * 8,
+            backgroundColor: colors[i % colors.length],
+            borderRadius: "50%",
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            opacity: 0.12,
+            animation: `scalePulse ${2 + Math.random() * 3}s infinite ease-in-out`,
+            animationDelay: `${Math.random() * 2}s`,
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+const SketchyBorder = ({ color }) => {
+  const points = [];
+  const steps = 40;
+  // Top
+  for (let i = 0; i <= steps; i++) points.push([(i / steps) * 100, Math.random() * 2 - 1]);
+  // Right
+  for (let i = 0; i <= steps; i++) points.push([100 + Math.random() * 2 - 1, (i / steps) * 100]);
+  // Bottom
+  for (let i = steps; i >= 0; i--) points.push([(i / steps) * 100, 100 + Math.random() * 2 - 1]);
+  // Left
+  for (let i = steps; i >= 0; i--) points.push([Math.random() * 2 - 1, (i / steps) * 100]);
+
+  const path = `M ${points.map(p => `${p[0]},${p[1]}`).join(" L ")} Z`;
+  
+  return (
+    <svg preserveAspectRatio="none" viewBox="-2 -2 104 104" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 10 }}>
+      <path d={path} fill="none" stroke={color} strokeWidth="1.5" opacity="0.3" strokeLinecap="round" />
+    </svg>
+  );
+};
+
 const generateId = () => Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+
+const Sparkler = ({ style }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" style={{ position: "absolute", ...style, pointerEvents: "none" }}>
+    {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => (
+      <line
+        key={angle}
+        x1="12" y1="12" x2="20" y2="12"
+        stroke="#FFB800"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        style={{
+          transformOrigin: "12px 12px",
+          transform: `rotate(${angle}deg)`,
+          animation: `sparkleLine 0.8s ease-in-out ${i * 0.1}s infinite`,
+        }}
+      />
+    ))}
+  </svg>
+);
 
 export default function Wellspring() {
   const [cards, setCards] = useState([]);
@@ -50,30 +182,8 @@ export default function Wellspring() {
   const [heroAnimDone, setHeroAnimDone] = useState(false);
   const [myWishes, setMyWishes] = useState(() => JSON.parse(localStorage.getItem('myWishes') || '[]'));
   const [editingCardId, setEditingCardId] = useState(null);
-  const [backgroundDecor, setBackgroundDecor] = useState({ bokeh: [], sparkles: [] });
   const fileInputRef = useRef(null);
 
-  useEffect(() => {
-    const bokehColors = ["rgba(255, 223, 153, 0.3)", "rgba(80, 200, 120, 0.2)", "rgba(212, 122, 144, 0.25)", "rgba(128, 0, 32, 0.15)"];
-    const bokeh = Array.from({ length: 6 }, (_, i) => ({
-      id: i,
-      size: 150 + Math.random() * 250,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      color: bokehColors[i % bokehColors.length],
-      duration: 15 + Math.random() * 20,
-      delay: Math.random() * -20,
-    }));
-    const sparkles = Array.from({ length: 20 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: 2 + Math.random() * 3,
-      duration: 2 + Math.random() * 3,
-      delay: Math.random() * 5,
-    }));
-    setBackgroundDecor({ bokeh, sparkles });
-  }, []);
 
   // Load cards from Firestore
   useEffect(() => {
@@ -86,22 +196,22 @@ export default function Wellspring() {
       console.error("Error loading wishes:", error);
       setLoading(false);
     });
-    
+
     setTimeout(() => setHeroAnimDone(true), 1800);
     return () => unsub();
   }, []);
 
   const launchConfetti = () => {
-    const pieces = Array.from({ length: 40 }, (_, i) => ({
+    const paletteColors = [PALETTE.coral, PALETTE.blue, PALETTE.purple, PALETTE.magenta, PALETTE.orange, PALETTE.green, PALETTE.yellow];
+    const pieces = Array.from({ length: 60 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
-      delay: Math.random() * 0.5,
-      color: ["#FFD700", "#FFBF00", "#50C878", "#800020"][i % 4],
-      rotation: Math.random() * 360,
-      duration: 1.5 + Math.random() * 1.5,
+      delay: Math.random() * 0.8,
+      color: paletteColors[i % paletteColors.length],
+      duration: 3 + Math.random() * 2,
     }));
     setConfetti(pieces);
-    setTimeout(() => setConfetti([]), 3500);
+    setTimeout(() => setConfetti([]), 5000);
   };
 
   const handleAddCard = async () => {
@@ -130,7 +240,7 @@ export default function Wellspring() {
           createdAt: Date.now(),
         };
         const docRef = await addDoc(collection(db, "wishes"), newCard);
-        
+
         const newMyWishes = [...myWishes, docRef.id];
         setMyWishes(newMyWishes);
         localStorage.setItem("myWishes", JSON.stringify(newMyWishes));
@@ -169,16 +279,16 @@ export default function Wellspring() {
     setShowAddModal(true);
   };
 
-  const handleReaction = async (cardId, emoji) => {
+  const handleReaction = async (cardId, label) => {
     const card = cards.find(c => c.id === cardId);
     if (!card) return;
-    
+
     const reactions = { ...card.reactions };
-    reactions[emoji] = (reactions[emoji] || 0) + 1;
-    
+    reactions[label] = (reactions[label] || 0) + 1;
+
     try {
       await updateDoc(doc(db, "wishes", cardId), { reactions });
-    } catch(e) {
+    } catch (e) {
       console.error("Error updating reaction:", e);
     }
   };
@@ -186,7 +296,7 @@ export default function Wellspring() {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    
+
     const reader = new FileReader();
     reader.onload = (ev) => {
       const img = new Image();
@@ -194,11 +304,11 @@ export default function Wellspring() {
         const canvas = document.createElement("canvas");
         let width = img.width;
         let height = img.height;
-        
+
         // Maximum dimensions to keep file size small
         const MAX_WIDTH = 800;
         const MAX_HEIGHT = 800;
-        
+
         if (width > height) {
           if (width > MAX_WIDTH) {
             height = Math.round((height * MAX_WIDTH) / width);
@@ -210,21 +320,21 @@ export default function Wellspring() {
             height = MAX_HEIGHT;
           }
         }
-        
+
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, width, height);
-        
+
         // Compress as JPEG with 70% quality
         const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
-        
+
         // Check if it's still bigger than Firestore's ~1MB limit
         if (dataUrl.length > 1000000) {
           alert("Image is still too large after compression. Please choose a smaller photo.");
           return;
         }
-        
+
         setSelectedImage(dataUrl);
       };
       img.src = ev.target.result;
@@ -235,7 +345,7 @@ export default function Wellspring() {
   const handleDeleteCard = async (cardId) => {
     try {
       await deleteDoc(doc(db, "wishes", cardId));
-    } catch(e) {
+    } catch (e) {
       console.error("Error deleting card:", e);
     }
   };
@@ -243,7 +353,7 @@ export default function Wellspring() {
   return (
     <div style={styles.root}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@400;500;600;700&family=Sacramento&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Delius+Swash+Caps&family=Delius&family=Lexend:wght@300;400;500;600;700&family=Quicksand:ital,wght@0,300;0,400;0,700;1,400&family=Ultra&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@400;500;600;700&display=swap');
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -261,12 +371,17 @@ export default function Wellspring() {
         }
         @keyframes confettiFall {
           0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
-          100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+          100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
         }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+        @keyframes scalePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
         @keyframes shimmer {
           0% { background-position: -200% center; }
           100% { background-position: 200% center; }
+        }
+        @keyframes brushReveal {
+          from { transform: scaleX(0); }
+          to { transform: scaleX(1); }
         }
         @keyframes heroSlide {
           from { opacity: 0; transform: translateY(40px) scale(0.95); }
@@ -289,6 +404,18 @@ export default function Wellspring() {
         @keyframes twinkle {
           0%, 100% { opacity: 0.3; transform: scale(1); }
           50% { opacity: 1; transform: scale(1.3); }
+        }
+        @keyframes starGlow {
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 1; }
+        }
+        @keyframes sparkleLine {
+          0%, 100% { opacity: 0; transform: scale(0.6) rotate(var(--angle)); }
+          50% { opacity: 1; transform: scale(1.1) rotate(var(--angle)); }
+        }
+        @keyframes lineShimmer {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 0.7; }
         }
 
         .hero-section {
@@ -353,9 +480,9 @@ export default function Wellspring() {
         .bg-pattern {
           position: fixed;
           inset: 0;
-          background-image: radial-gradient(#000 0.5px, transparent 0.5px);
-          background-size: 30px 30px;
-          opacity: 0.03;
+          background-image: radial-gradient(rgba(255, 200, 200, 0.07) 0.5px, transparent 0.5px);
+          background-size: 28px 28px;
+          opacity: 1;
           z-index: 1;
           pointer-events: none;
         }
@@ -408,71 +535,48 @@ export default function Wellspring() {
       ))}
 
       {/* Custom Background Elements */}
-      <div className="bg-pattern" />
-      <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
-        {backgroundDecor.bokeh.map(b => (
-          <div
-            key={b.id}
-            className="bokeh-blob"
-            style={{
-              width: b.size,
-              height: b.size,
-              left: `${b.x}%`,
-              top: `${b.y}%`,
-              background: b.color,
-              animation: `bokehDrift ${b.duration}s ${b.delay}s ease-in-out infinite`,
-            }}
-          />
-        ))}
-        {backgroundDecor.sparkles.map(s => (
-          <div
-            key={s.id}
-            className="sparkle-dot"
-            style={{
-              width: s.size,
-              height: s.size,
-              left: `${s.x}%`,
-              top: `${s.y}%`,
-              animation: `twinkle ${s.duration}s ${s.delay}s ease-in-out infinite`,
-            }}
-          />
-        ))}
-      </div>
+      {/* Background Art Layers */}
+      <CanvasGrain />
+      <WatercolourSplatters />
+      <BrushStrokes />
+      <SketchyMarks />
+      <ConfettiDots />
 
-      {/* Floating decorative elements */}
-      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, pointerEvents: "none", overflow: "hidden", zIndex: 1 }}>
-        {["🎈", "🎁", "✨", "🎂", "💖", "🎊", "🥳", "🌟", "🎇", "🪄"].map((emoji, i) => (
-          <div
-            key={i}
-            style={{
-              position: "absolute",
-              fontSize: 24 + Math.random() * 20,
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animation: `float ${4 + Math.random() * 4}s ${Math.random() * 2}s ease-in-out infinite`,
-              opacity: 0.12,
-            }}
-          >
-            {emoji}
-          </div>
-        ))}
-      </div>
 
       {/* Hero Section */}
       <div className="hero-section" style={styles.hero}>
         <div style={styles.heroInner}>
-          <div style={styles.heroEmoji}>🎂</div>
-          <h1 style={styles.heroTitle}>Happy Birthday</h1>
-          <div style={styles.heroName}>Omoye Zindzi Iyayi</div>
-          <p style={styles.heroSub}>
-            A collection of warm wishes from friends and colleagues
-          </p>
-          <div style={styles.cardCount}>
+          <div style={styles.heroPreTitle}>✦ A CELEBRATION ✦</div>
+          <div style={styles.heroTitleWrapper}>
+            <svg style={styles.heroBrush} viewBox="0 0 400 60" preserveAspectRatio="none">
+              <path d="M10,30 Q100,10 200,30 T390,30" stroke={PALETTE.coral} strokeWidth="40" fill="none" strokeLinecap="round" />
+            </svg>
+            <h1 style={styles.heroTitle}>Happy Birthday</h1>
+          </div>
+          <div style={{ position: "relative", display: "inline-block" }}>
+            <Sparkler style={{ top: -15, left: -25, transform: "scale(0.8)" }} />
+            <Sparkler style={{ top: -20, right: -20, transform: "scale(0.6) rotate(15deg)" }} />
+            <div style={styles.heroName}>Omoye Zindzi Iyayi</div>
+            <Sparkler style={{ bottom: -10, left: "20%", transform: "scale(0.5)" }} />
+            <Sparkler style={{ bottom: -5, right: "15%", transform: "scale(0.7) rotate(-10deg)" }} />
+          </div>
+          
+          <div style={styles.heroDivider}>
+            <svg width="120" height="20" viewBox="0 0 120 20">
+              <path d="M0,10 Q30,0 60,10 T120,10" fill="none" stroke={PALETTE.lilac} strokeWidth="1.5" />
+              <circle cx="5" cy="10" r="3" fill={PALETTE.coral} />
+              <circle cx="60" cy="10" r="3" fill={PALETTE.blue} />
+              <circle cx="115" cy="10" r="3" fill={PALETTE.purple} />
+            </svg>
+          </div>
+
+          <p style={styles.heroSub}>warm wishes, gathered</p>
+          
+          <div style={styles.heroCounter}>
             <span style={styles.countNum}>{cards.length}</span>
-            <span style={styles.countLabel}>{cards.length === 1 ? "wish" : "wishes"} so far</span>
+            <span style={styles.countLabel}>wishes</span>
           </div>
         </div>
-        <div style={styles.heroDeco}></div>
       </div>
 
       {/* Add Button */}
@@ -483,86 +587,78 @@ export default function Wellspring() {
 
       {/* Cards Grid */}
       {loading ? (
-        <div style={styles.loadingWrap}>
-          <div style={{ animation: "pulse 1.5s infinite", fontSize: 40 }}>🎂</div>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", color: "#999", marginTop: 12 }}>Loading wishes...</p>
+        <div style={{ textAlign: "center", padding: "100px 0" }}>
+          <div style={{ fontSize: 40, animation: "pulse 1.5s infinite" }}>🖌️</div>
+          <p style={{ color: PALETTE.textLight, marginTop: 10 }}>Curating the gallery...</p>
         </div>
       ) : cards.length === 0 ? (
-        <div style={styles.emptyState}>
-          <div style={{ fontSize: 56, marginBottom: 16 }}>🎈</div>
-          <p style={styles.emptyTitle}>No wishes yet!</p>
-          <p style={styles.emptySub}>Be the first to add a birthday wish for Omoye Zindzi.</p>
+        <div style={{ textAlign: "center", padding: "100px 24px" }}>
+          <div style={{ fontSize: 40, marginBottom: 16 }}>✨</div>
+          <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700 }}>No wishes yet</p>
+          <p style={{ color: PALETTE.textLight, marginTop: 8 }}>Be the first to leave a mark in the gallery.</p>
         </div>
       ) : (
-        <div className="masonry-grid">
+        <div className="masonry-grid" style={{ paddingBottom: 60 }}>
           {cards.map((card, i) => (
             <div
               key={card.id}
               className="card-item card-wrapper masonry-item"
-              style={{ ...styles.card, background: card.bg, animationDelay: `${i * 0.08}s` }}
+              style={{ 
+                ...styles.card, 
+                background: card.bg || CARD_COLORS[i % CARD_COLORS.length], 
+                animation: `fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) ${i * 0.07}s forwards`,
+                opacity: 0
+              }}
             >
+              <SketchyBorder color={PALETTE.lilac} />
+
               {/* Edit / Delete buttons */}
               {myWishes.includes(card.id) && (
                 <div className="card-controls" style={styles.cardControls}>
-                  <button
-                    className="control-btn"
-                    onClick={() => handleEditClick(card)}
-                    style={styles.controlBtn}
-                    title="Edit"
-                  >
-                    ✎
-                  </button>
-                  <button
-                    className="control-btn"
-                    onClick={() => handleDeleteCard(card.id)}
-                    style={styles.controlBtn}
-                    title="Remove"
-                  >
-                    ×
-                  </button>
+                  <button className="control-btn" onClick={() => handleEditClick(card)} title="Edit">✎</button>
+                  <button className="control-btn" onClick={() => handleDeleteCard(card.id)} title="Remove">×</button>
                 </div>
               )}
 
-              {card.sticker && (
-                <div style={styles.cardSticker}>{card.sticker}</div>
-              )}
-              {card.image && (
+              {/* Media Content */}
+              {card.sticker && <div style={{ fontSize: 42, textAlign: "center", margin: "32px 0 0" }}>{card.sticker}</div>}
+              {(card.image || card.gif) && (
                 <div style={styles.cardImageWrap}>
-                  <img src={card.image} alt="" style={styles.cardImage} />
+                  <img src={card.image || card.gif} alt="" style={styles.cardImage} />
                 </div>
               )}
-              {card.gif && (
-                <div style={styles.cardImageWrap}>
-                  <img src={card.gif} alt="" style={styles.cardImage} />
-                </div>
-              )}
-              {card.message && <p style={styles.cardMessage}>{card.message}</p>}
-              <div style={styles.cardAuthor}>— {card.author}</div>
 
-              {/* Reactions */}
-              <div style={styles.reactionsRow}>
-                {REACTIONS.map((r) => (
-                  <button
-                    key={r.emoji}
-                    className="reaction-btn"
-                    style={{
-                      ...styles.reactionBtn,
-                      ...(card.reactions[r.emoji] ? styles.reactionBtnActive : {}),
-                    }}
-                    onClick={() => handleReaction(card.id, r.emoji)}
-                    title={r.label}
-                  >
-                    <span>{r.emoji}</span>
-                    {card.reactions[r.emoji] > 0 && (
-                      <span style={styles.reactionCount}>{card.reactions[r.emoji]}</span>
-                    )}
-                  </button>
-                ))}
+              <div style={styles.cardBody}>
+                {card.message && <div style={styles.cardMessage}>“{card.message}”</div>}
+                
+                <div style={styles.cardFooter}>
+                  <div style={styles.cardAuthor}>— {card.author}</div>
+                  
+                  <div style={styles.reactionsRow}>
+                    {REACTIONS.map((r) => {
+                      const count = card.reactions?.[r.label] || 0;
+                      return (
+                        <button
+                          key={r.label}
+                          style={{
+                                ...styles.reactionBtn,
+                                ...(count > 0 ? styles.reactionBtnActive : {}),
+                          }}
+                          onClick={() => handleReaction(card.id, r.label)}
+                        >
+                          <span style={{ fontSize: 13 }}>{r.emoji}</span>
+                          <span style={styles.reactionCount}>{count}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
           ))}
         </div>
       )}
+
 
       {/* Add Modal */}
       {showAddModal && (
@@ -572,53 +668,49 @@ export default function Wellspring() {
           onClick={(e) => e.target === e.currentTarget && (setShowAddModal(false), resetForm())}
         >
           <div className="modal-content" style={styles.modal}>
+            <button style={styles.closeBtn} onClick={() => { setShowAddModal(false); resetForm(); }}>✕</button>
             <div style={styles.modalHeader}>
-              <h2 style={styles.modalTitle}>{editingCardId ? "Edit Your Wish ✨" : "Add Your Wish ✨"}</h2>
-              <button style={styles.closeBtn} onClick={() => { setShowAddModal(false); resetForm(); }}>×</button>
+              <h2 style={styles.modalTitle}>{editingCardId ? "Refine Your Mark" : "Leave Your Mark"}</h2>
             </div>
 
-            {/* Name input */}
             <div style={styles.fieldGroup}>
               <label style={styles.label}>Your Name</label>
               <input
                 style={styles.input}
-                placeholder="Enter your name..."
+                placeholder="Write your name..."
                 value={authorName}
                 onChange={(e) => setAuthorName(e.target.value)}
               />
             </div>
 
-            {/* Tabs */}
-            <div style={styles.tabs}>
+            <div style={styles.tabNav}>
               {[
-                { id: "message", icon: "💬", label: "Message" },
-                { id: "photo", icon: "📸", label: "Photo" },
-                { id: "gif", icon: "🎬", label: "GIFs" },
-                { id: "sticker", icon: "🎈", label: "Stickers" },
+                { id: "message", label: "words" },
+                { id: "photo", label: "photo" },
+                { id: "gif", label: "gif" },
+                { id: "sticker", label: "mark" },
               ].map((tab) => (
                 <button
                   key={tab.id}
-                  className="tab-btn"
                   style={{
-                    ...styles.tab,
-                    ...(activeTab === tab.id ? styles.tabActive : {}),
+                    ...styles.tabBtn,
+                    ...(activeTab === tab.id ? styles.tabBtnActive : {}),
                   }}
                   onClick={() => setActiveTab(tab.id)}
                 >
-                  <span>{tab.icon}</span>
-                  <span>{tab.label}</span>
+                  {tab.label}
+                  {activeTab === tab.id && <div style={styles.tabUnderline} />}
                 </button>
               ))}
             </div>
 
-            {/* Tab content */}
             <div style={styles.tabContent}>
               {activeTab === "message" && (
                 <div style={styles.fieldGroup}>
-                  <label style={styles.label}>Birthday Message</label>
+                  <label style={styles.label}>Birthday Wish</label>
                   <textarea
                     style={styles.textarea}
-                    placeholder="Write a heartfelt birthday wish..."
+                    placeholder="Write something heartfelt..."
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     rows={4}
@@ -638,30 +730,19 @@ export default function Wellspring() {
                   {selectedImage ? (
                     <div style={{ position: "relative" }}>
                       <img src={selectedImage} alt="" style={styles.previewImage} />
-                      <button
-                        style={styles.removeMediaBtn}
-                        onClick={() => setSelectedImage(null)}
-                      >
-                        ✕ Remove
-                      </button>
+                      <button style={styles.removeMediaBtn} onClick={() => setSelectedImage(null)}>✕</button>
                     </div>
                   ) : (
-                    <button
-                      style={styles.uploadBtn}
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <span style={{ fontSize: 32 }}>📸</span>
-                      <span style={{ fontWeight: 600 }}>Upload a Photo</span>
-                      <span style={{ fontSize: 13, color: "#999" }}>JPG, PNG, GIF up to 5MB</span>
-                    </button>
+                    <div style={styles.uploadArea} onClick={() => fileInputRef.current?.click()}>
+                      <span>📸 Upload from gallery</span>
+                    </div>
                   )}
-                  <div style={{ ...styles.fieldGroup, marginTop: 14 }}>
+                  <div style={{ ...styles.fieldGroup, marginTop: 16 }}>
                     <textarea
                       style={{ ...styles.textarea, minHeight: 60 }}
-                      placeholder="Add a caption (optional)..."
+                      placeholder="Add a caption..."
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      rows={2}
                     />
                   </div>
                 </div>
@@ -669,32 +750,26 @@ export default function Wellspring() {
 
               {activeTab === "gif" && (
                 <div>
-                  <p style={styles.gifHint}>Pick a birthday GIF:</p>
                   <div style={styles.gifGrid}>
                     {GIPHY_SUGGESTIONS.map((url, i) => (
                       <div
                         key={i}
-                        className="gif-item"
                         style={{
                           ...styles.gifItem,
                           ...(selectedGif === url ? styles.gifItemSelected : {}),
                         }}
-                        onClick={() => setSelectedGif(selectedGif === url ? null : url)}
+                        onClick={() => setSelectedGif(url === selectedGif ? null : url)}
                       >
                         <img src={url} alt="" style={styles.gifImg} />
-                        {selectedGif === url && (
-                          <div style={styles.gifCheck}>✓</div>
-                        )}
                       </div>
                     ))}
                   </div>
-                  <div style={{ ...styles.fieldGroup, marginTop: 14 }}>
+                  <div style={{ ...styles.fieldGroup, marginTop: 16 }}>
                     <textarea
                       style={{ ...styles.textarea, minHeight: 60 }}
-                      placeholder="Add a message (optional)..."
+                      placeholder="Add a message..."
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      rows={2}
                     />
                   </div>
                 </div>
@@ -702,53 +777,54 @@ export default function Wellspring() {
 
               {activeTab === "sticker" && (
                 <div>
-                  <p style={styles.gifHint}>Pick a sticker to add flair:</p>
                   <div style={styles.stickerGrid}>
                     {STICKERS.map((s, i) => (
                       <button
                         key={i}
-                        className="sticker-btn"
                         style={{
                           ...styles.stickerBtn,
                           ...(selectedSticker === s ? styles.stickerBtnSelected : {}),
                         }}
-                        onClick={() => setSelectedSticker(selectedSticker === s ? null : s)}
+                        onClick={() => setSelectedSticker(s === selectedSticker ? null : s)}
                       >
                         {s}
                       </button>
                     ))}
                   </div>
-                  <div style={{ ...styles.fieldGroup, marginTop: 14 }}>
+                  <div style={{ ...styles.fieldGroup, marginTop: 16 }}>
                     <textarea
                       style={{ ...styles.textarea, minHeight: 60 }}
-                      placeholder="Add a message (optional)..."
+                      placeholder="Add a message..."
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      rows={2}
                     />
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Submit */}
             <button
               style={{
                 ...styles.submitBtn,
-                opacity: authorName.trim() && (message.trim() || selectedImage || selectedGif || selectedSticker) ? 1 : 0.5,
+                opacity: authorName.trim() ? 1 : 0.5,
               }}
               onClick={handleAddCard}
-              disabled={!authorName.trim() || (!message.trim() && !selectedImage && !selectedGif && !selectedSticker)}
+              disabled={!authorName.trim()}
             >
-              {editingCardId ? "💾 Save Changes" : "🎉 Post Birthday Wish"}
+              {editingCardId ? "Save Refinement" : "Post to Gallery"}
             </button>
           </div>
         </div>
       )}
 
-      <div style={styles.footer}>
-        <p>Made with 💖 for Omoye Zindzi Iyayi's birthday</p>
-      </div>
+      <footer style={styles.footer}>
+        <div style={styles.footerDivider}>
+          <div style={{ ...styles.footerDot, background: PALETTE.coral }} />
+          <div style={{ ...styles.footerDot, background: PALETTE.blue }} />
+          <div style={{ ...styles.footerDot, background: PALETTE.purple }} />
+        </div>
+        <div style={styles.footerText}>WELLSPRING</div>
+      </footer>
     </div>
   );
 }
@@ -756,197 +832,203 @@ export default function Wellspring() {
 const styles = {
   root: {
     minHeight: "100vh",
-    background: `
-      radial-gradient(at 0% 0%, rgba(255, 223, 153, 0.15) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, rgba(80, 200, 120, 0.12) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(212, 122, 144, 0.15) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, rgba(128, 0, 32, 0.08) 0px, transparent 50%),
-      linear-gradient(180deg, #FFFDF5 0%, #FDF7EC 100%)
-    `,
+    background: `linear-gradient(135deg, ${PALETTE.bg[0]} 0%, ${PALETTE.bg[1]} 33%, ${PALETTE.bg[2]} 66%, ${PALETTE.bg[3]} 100%)`,
     backgroundAttachment: "fixed",
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: "'Lexend', sans-serif",
+    color: PALETTE.text,
     position: "relative",
     overflow: "hidden",
   },
   hero: {
     position: "relative",
     textAlign: "center",
-    padding: "56px 24px 40px",
-    overflow: "hidden",
+    padding: "80px 24px 60px",
+    zIndex: 2,
   },
   heroInner: {
     position: "relative",
-    zIndex: 2,
+    maxWidth: 800,
+    margin: "0 auto",
   },
-  heroEmoji: {
-    fontSize: 56,
+  heroPreTitle: {
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: "0.25em",
+    color: PALETTE.textLight,
+    marginBottom: 16,
+    fontWeight: 500,
+  },
+  heroTitleWrapper: {
+    position: "relative",
+    display: "inline-block",
     marginBottom: 8,
-    animation: "float 4s ease-in-out infinite",
+  },
+  heroBrush: {
+    position: "absolute",
+    bottom: -10,
+    left: "5%",
+    width: "90%",
+    height: 40,
+    opacity: 0.15,
+    zIndex: -1,
+    transformOrigin: "left",
+    animation: "brushReveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards",
   },
   heroTitle: {
     fontFamily: "'Playfair Display', serif",
-    fontSize: "clamp(32px, 7vw, 52px)",
+    fontSize: "clamp(42px, 8vw, 72px)",
     fontWeight: 900,
-    color: "#2D2D2D",
-    lineHeight: 1.1,
-    letterSpacing: "-0.02em",
+    color: PALETTE.text,
+    lineHeight: 1,
+    margin: 0,
   },
   heroName: {
-    fontFamily: "'Sacramento', cursive",
-    fontSize: "clamp(42px, 10vw, 76px)",
-    fontWeight: "900",
-    background: "linear-gradient(90deg, #50C878, #FFD700, #FF6B8A, #50C878)",
-    backgroundSize: "200% auto",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-    animation: "shimmer 4s linear infinite",
-    marginTop: 4,
-    lineHeight: 1.5, // Increased from 1.2 to prevent clipping
-    paddingBottom: "10px", // Extra space for descenders
-    textShadow: "2px 2px 15px rgba(80,200,120,0.3)",
-    display: "inline-block",
+    fontFamily: "'Caveat', cursive",
+    fontSize: "clamp(32px, 6vw, 48px)",
+    color: PALETTE.purple,
+    marginTop: 0,
+  },
+  heroDivider: {
+    margin: "24px 0",
+    display: "flex",
+    justifyContent: "center",
   },
   heroSub: {
-    fontFamily: "'DM Sans', sans-serif",
-    fontSize: 15,
-    color: "#888",
-    marginTop: 12,
-    letterSpacing: "0.02em",
+    fontSize: 14,
+    color: PALETTE.textLight,
+    letterSpacing: "0.15em",
+    textTransform: "lowercase",
+    marginBottom: 24,
   },
-  cardCount: {
-    display: "inline-flex",
+  heroCounter: {
+    display: "flex",
+    flexDirection: "column",
     alignItems: "center",
-    gap: 8,
-    marginTop: 20,
-    background: "rgba(255,255,255,0.8)",
-    backdropFilter: "blur(10px)",
-    borderRadius: 50,
-    padding: "8px 20px",
-    border: "1px solid rgba(212,175,55,0.3)",
   },
   countNum: {
     fontFamily: "'Playfair Display', serif",
-    fontSize: 22,
+    fontSize: 32,
     fontWeight: 900,
-    color: "#D4AF37",
+    color: PALETTE.text,
   },
   countLabel: {
-    fontSize: 14,
-    color: "#777",
-    fontWeight: 500,
-  },
-  heroDeco: {
-    position: "absolute",
-    top: -60,
-    right: -60,
-    width: 200,
-    height: 200,
-    borderRadius: "50%",
-    background: "radial-gradient(circle, rgba(255,191,0,0.12) 0%, transparent 70%)",
-    zIndex: 0,
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: "0.15em",
+    color: PALETTE.textLight,
+    marginTop: -4,
   },
   addBtn: {
     display: "flex",
     alignItems: "center",
-    gap: 10,
-    margin: "0 auto 32px",
-    padding: "14px 32px",
-    background: "linear-gradient(135deg, #800020 0%, #B3002D 100%)",
-    color: "white",
+    gap: 12,
+    margin: "0 auto 48px",
+    padding: "16px 32px",
+    background: PALETTE.purple,
+    color: "#FFF",
     border: "none",
-    borderRadius: 50,
-    fontFamily: "'DM Sans', sans-serif",
-    fontSize: 16,
-    fontWeight: 700,
+    borderRadius: 0,
+    fontFamily: "'Lexend', sans-serif",
+    fontSize: 12,
+    fontWeight: 600,
+    textTransform: "uppercase",
+    letterSpacing: "0.2em",
     cursor: "pointer",
-    boxShadow: "0 4px 20px rgba(128,0,32,0.3)",
+    boxShadow: "0 4px 15px rgba(107, 76, 138, 0.2)",
     transition: "all 0.3s cubic-bezier(0.22, 1, 0.36, 1)",
-    zIndex: 10,
     position: "relative",
+    overflow: "hidden",
+    zIndex: 10,
   },
   grid: {
     // Legacy styles, now handled by .masonry-grid class
   },
   card: {
-    borderRadius: 22,
-    padding: 24,
+    borderRadius: 0,
+    padding: 0,
     position: "relative",
-    background: "rgba(255, 255, 255, 0.7)",
-    backdropFilter: "blur(12px)",
-    border: "1px solid rgba(255, 255, 255, 0.8)",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.02)",
+    border: "none",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.04)",
     transition: "all 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
     cursor: "default",
-    overflow: "hidden",
+    overflow: "visible", // To show the sketchy border
     zIndex: 2,
-    display: "inline-block", // Required for masonry
-    width: "100%", // Required for masonry
+    display: "flex",
+    flexDirection: "column",
+    width: "100%",
+    minHeight: 180,
   },
   cardControls: {
     position: "absolute",
-    top: 8,
-    right: 10,
+    top: -12,
+    right: -12,
     display: "flex",
     gap: 6,
-    zIndex: 3,
+    zIndex: 20,
   },
   controlBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: "50%",
-    border: "none",
-    background: "rgba(0,0,0,0.08)",
-    color: "#888",
-    fontSize: 15,
+    width: 32,
+    height: 32,
+    borderRadius: 0,
+    border: "1px solid #EEE",
+    background: "#FFF",
+    color: PALETTE.textMid,
+    fontSize: 16,
     cursor: "pointer",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     transition: "all 0.2s",
-    lineHeight: 1,
-  },
-  cardSticker: {
-    fontSize: 42,
-    marginBottom: 10,
-    textAlign: "center",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
   },
   cardImageWrap: {
-    borderRadius: 12,
+    borderRadius: 0,
     overflow: "hidden",
-    marginBottom: 14,
-    boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
-    background: "rgba(0,0,0,0.05)", // Soft background for contained images
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    background: "rgba(0,0,0,0.02)",
+    flexShrink: 0,
+    width: "100%",
   },
   cardImage: {
     width: "100%",
     display: "block",
-    maxHeight: 420, // Increased from 220
-    objectFit: "contain", // Switch from cover to contain to show full image
+    maxHeight: 400,
+    objectFit: "contain",
+  },
+  cardBody: {
+    padding: "32px 24px 24px",
+    display: "flex",
+    flexDirection: "column",
+    flexGrow: 1,
+    position: "relative",
   },
   cardMessage: {
-    fontSize: 15,
-    lineHeight: 1.65,
-    color: "#3D3D3D",
-    marginBottom: 12,
-    whiteSpace: "pre-wrap",
-    wordBreak: "break-word",
+    fontFamily: "'Quicksand', sans-serif",
+    fontSize: 17,
+    fontStyle: "italic",
+    lineHeight: 1.7,
+    color: PALETTE.text,
+    marginBottom: 20,
+    flexGrow: 1,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center",
+  },
+  cardFooter: {
+    marginTop: "auto",
+    textAlign: "center",
   },
   cardAuthor: {
-    fontFamily: "'Playfair Display', serif",
-    fontStyle: "italic",
-    fontSize: 15,
-    color: "#FFF",
-    fontWeight: "700",
-    textShadow: "0 1px 4px rgba(0,0,0,0.25)",
-    marginBottom: 14,
-    opacity: 0.95,
+    fontFamily: "'Caveat', cursive",
+    fontSize: 19,
+    color: PALETTE.purple,
+    marginBottom: 16,
+    fontWeight: 400,
   },
   reactionsRow: {
     display: "flex",
-    gap: 6,
+    gap: 8,
+    justifyContent: "center",
     flexWrap: "wrap",
   },
   reactionBtn: {
@@ -954,27 +1036,27 @@ const styles = {
     alignItems: "center",
     gap: 4,
     padding: "4px 10px",
-    borderRadius: 50,
-    border: "1px solid rgba(0,0,0,0.06)",
-    background: "rgba(255,255,255,0.7)",
+    borderRadius: 0,
+    border: "1px solid #F0F0F0",
+    background: "transparent",
     cursor: "pointer",
     fontSize: 14,
     transition: "all 0.2s cubic-bezier(0.22, 1, 0.36, 1)",
   },
   reactionBtnActive: {
-    border: "1px solid rgba(80,200,120,0.4)",
-    background: "rgba(80,200,120,0.15)",
+    background: "rgba(107, 76, 138, 0.05)",
+    borderColor: PALETTE.lilac,
   },
   reactionCount: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 700,
-    color: "#50C878",
+    color: PALETTE.purple,
   },
   overlay: {
     position: "fixed",
     inset: 0,
-    background: "rgba(0,0,0,0.4)",
-    backdropFilter: "blur(8px)",
+    background: "rgba(30, 30, 46, 0.2)",
+    backdropFilter: "blur(4px)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -982,256 +1064,154 @@ const styles = {
     padding: 16,
   },
   modal: {
-    background: "white",
-    borderRadius: 24,
+    background: "#FFFBFD",
+    borderRadius: 0,
     width: "100%",
-    maxWidth: 480,
+    maxWidth: 500,
     maxHeight: "90vh",
     overflow: "auto",
-    padding: 28,
-    boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
+    padding: 40,
+    boxShadow: "0 30px 90px rgba(0,0,0,0.15)",
+    position: "relative",
   },
   modalHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 22,
+    textAlign: "center",
+    marginBottom: 32,
   },
   modalTitle: {
-    fontFamily: "'Playfair Display', serif",
-    fontSize: 22,
-    fontWeight: 700,
-    color: "#2D2D2D",
+    fontFamily: "'Caveat', cursive",
+    fontSize: 32,
+    color: PALETTE.purple,
+    margin: 0,
   },
   closeBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: "50%",
+    position: "absolute",
+    top: 20,
+    right: 20,
+    width: 32,
+    height: 32,
     border: "none",
-    background: "#f5f5f5",
-    fontSize: 20,
+    background: "none",
+    fontSize: 24,
+    color: PALETTE.textLight,
     cursor: "pointer",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    color: "#999",
-    transition: "background 0.2s",
+  },
+  tabNav: {
+    display: "flex",
+    justifyContent: "center",
+    gap: 24,
+    marginBottom: 32,
+    borderBottom: `1px solid ${PALETTE.lilac}44`,
+  },
+  tabBtn: {
+    padding: "8px 4px",
+    textTransform: "uppercase",
+    fontSize: 11,
+    letterSpacing: "0.15em",
+    fontWeight: 600,
+    color: PALETTE.textLight,
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    position: "relative",
+    transition: "color 0.2s",
+  },
+  tabBtnActive: {
+    color: PALETTE.text,
+  },
+  tabUnderline: {
+    position: "absolute",
+    bottom: -1,
+    left: 0,
+    width: "100%",
+    height: 2,
+    background: PALETTE.coral,
   },
   fieldGroup: {
-    marginBottom: 16,
+    marginBottom: 24,
   },
   label: {
     display: "block",
-    fontSize: 13,
-    fontWeight: 600,
-    color: "#666",
-    marginBottom: 6,
-    letterSpacing: "0.03em",
+    fontSize: 11,
     textTransform: "uppercase",
+    letterSpacing: "0.12em",
+    color: PALETTE.textLight,
+    marginBottom: 8,
   },
   input: {
     width: "100%",
-    padding: "12px 16px",
-    borderRadius: 12,
-    border: "2px solid #EEE",
+    padding: "12px 0",
+    border: "none",
+    borderBottom: `1px solid ${PALETTE.lilac}`,
+    background: "none",
+    fontFamily: "'Lexend', sans-serif",
     fontSize: 15,
-    fontFamily: "'DM Sans', sans-serif",
+    color: PALETTE.text,
+    borderRadius: 0,
     outline: "none",
-    transition: "border 0.2s",
-    background: "#FAFAFA",
+    transition: "border-color 0.2s",
   },
   textarea: {
     width: "100%",
-    padding: "12px 16px",
-    borderRadius: 12,
-    border: "2px solid #EEE",
-    fontSize: 15,
-    fontFamily: "'DM Sans', sans-serif",
+    padding: "12px 0",
+    border: "none",
+    borderBottom: `1px solid ${PALETTE.lilac}`,
+    background: "none",
+    fontFamily: "'Quicksand', sans-serif",
+    fontSize: 16,
+    color: PALETTE.text,
+    borderRadius: 0,
     outline: "none",
-    resize: "vertical",
-    minHeight: 100,
-    lineHeight: 1.6,
-    transition: "border 0.2s",
-    background: "#FAFAFA",
+    resize: "none",
   },
-  tabs: {
-    display: "flex",
-    gap: 4,
-    marginBottom: 16,
-    background: "#F5F5F5",
-    borderRadius: 14,
-    padding: 4,
-  },
-  tab: {
-    flex: 1,
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: 2,
-    padding: "10px 8px",
-    borderRadius: 12,
-    border: "none",
-    background: "transparent",
-    cursor: "pointer",
-    fontSize: 12,
-    fontWeight: 600,
-    color: "#999",
-    fontFamily: "'DM Sans', sans-serif",
-    transition: "all 0.2s",
-  },
-  tabActive: {
-    background: "white",
-    color: "#FF6B8A",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-  },
-  tabContent: {
-    marginBottom: 20,
-  },
-  photoTab: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 12,
-  },
-  uploadBtn: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: 8,
-    padding: "32px 24px",
-    borderRadius: 16,
-    border: "2px dashed #DDD",
-    background: "#FAFAFA",
-    cursor: "pointer",
-    fontFamily: "'DM Sans', sans-serif",
-    fontSize: 15,
-    color: "#666",
-    transition: "all 0.2s",
-    width: "100%",
-  },
-  previewImage: {
-    width: "100%",
-    maxHeight: 200,
-    objectFit: "cover",
-    borderRadius: 12,
-    display: "block",
-  },
-  removeMediaBtn: {
-    position: "absolute",
-    top: 8,
-    right: 8,
-    padding: "6px 14px",
-    borderRadius: 50,
-    border: "none",
-    background: "rgba(0,0,0,0.6)",
-    color: "white",
-    fontSize: 13,
-    fontWeight: 600,
-    cursor: "pointer",
-    fontFamily: "'DM Sans', sans-serif",
-  },
-  gifHint: {
-    fontSize: 13,
-    color: "#999",
-    marginBottom: 10,
-    fontWeight: 500,
-  },
-  gifGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, 1fr)",
-    gap: 8,
-    maxHeight: 240,
-    overflow: "auto",
-  },
-  gifItem: {
-    borderRadius: 12,
-    overflow: "hidden",
-    cursor: "pointer",
-    position: "relative",
-    transition: "all 0.2s",
-    border: "3px solid transparent",
-    aspectRatio: "1",
-  },
-  gifItemSelected: {
-    border: "3px solid #FF6B8A",
-  },
-  gifImg: {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-    display: "block",
-  },
-  gifCheck: {
-    position: "absolute",
-    top: 6,
-    right: 6,
-    width: 24,
-    height: 24,
-    borderRadius: "50%",
-    background: "#FF6B8A",
-    color: "white",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: 14,
-    fontWeight: 700,
-  },
-  stickerGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(6, 1fr)",
-    gap: 8,
-  },
-  stickerBtn: {
-    fontSize: 32,
-    padding: "10px 0",
-    borderRadius: 12,
-    border: "2px solid transparent",
-    background: "rgba(255,255,255,0.6)",
-    cursor: "pointer",
-    transition: "all 0.2s cubic-bezier(0.22, 1, 0.36, 1)",
+  uploadArea: {
+    border: `1px dashed ${PALETTE.lilac}`,
+    padding: 32,
     textAlign: "center",
-  },
-  stickerBtnSelected: {
-    border: "2px solid #FF6B8A",
-    background: "rgba(255,107,138,0.08)",
+    cursor: "pointer",
+    color: PALETTE.textLight,
+    fontSize: 14,
+    transition: "all 0.2s",
   },
   submitBtn: {
     width: "100%",
-    padding: "14px",
-    borderRadius: 14,
+    padding: "16px",
+    background: PALETTE.purple,
+    color: "#FFF",
     border: "none",
-    background: "linear-gradient(135deg, #FF6B8A 0%, #FF8E53 100%)",
-    color: "white",
-    fontSize: 16,
+    borderRadius: 0,
+    fontSize: 12,
     fontWeight: 700,
-    fontFamily: "'DM Sans', sans-serif",
+    textTransform: "uppercase",
+    letterSpacing: "0.2em",
+    fontFamily: "'Lexend', sans-serif",
     cursor: "pointer",
-    transition: "all 0.2s",
-    boxShadow: "0 4px 16px rgba(255,107,138,0.3)",
-  },
-  loadingWrap: {
-    textAlign: "center",
-    padding: "60px 24px",
-  },
-  emptyState: {
-    textAlign: "center",
-    padding: "48px 24px 80px",
-  },
-  emptyTitle: {
-    fontFamily: "'Playfair Display', serif",
-    fontSize: 22,
-    fontWeight: 700,
-    color: "#2D2D2D",
-    marginBottom: 6,
-  },
-  emptySub: {
-    fontSize: 15,
-    color: "#999",
+    transition: "all 0.3s",
   },
   footer: {
+    padding: "60px 24px",
     textAlign: "center",
-    padding: "24px",
-    fontSize: 13,
-    color: "#BBB",
-    fontFamily: "'DM Sans', sans-serif",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  footerDivider: {
+    display: "flex",
+    gap: 8,
+    marginBottom: 20,
+  },
+  footerDot: {
+    width: 6,
+    height: 6,
+    borderRadius: "50%",
+  },
+  footerText: {
+    fontSize: 10,
+    textTransform: "uppercase",
+    letterSpacing: "0.25em",
+    color: PALETTE.textLight,
   },
 };
