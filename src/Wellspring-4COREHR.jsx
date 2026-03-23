@@ -278,7 +278,13 @@ export default function Wellspring() {
         <div style={styles.heroInner}>
           <div style={styles.heroEmoji}>🎂</div>
           <h1 style={styles.heroTitle}>Happy Birthday</h1>
-          <div style={styles.heroName}>Omoye Zindzi Iyayi</div>
+          <div style={{ position: "relative", display: "inline-block" }}>
+            <Sparkler style={{ top: -15, left: -25, transform: "scale(0.8)" }} />
+            <Sparkler style={{ top: -20, right: -20, transform: "scale(0.6) rotate(15deg)" }} />
+            <div style={styles.heroName}>Omoye Zindzi Iyayi</div>
+            <Sparkler style={{ bottom: -10, left: "20%", transform: "scale(0.5)" }} />
+            <Sparkler style={{ bottom: -5, right: "15%", transform: "scale(0.7) rotate(-10deg)" }} />
+          </div>
           <p style={styles.heroSub}>
             A collection of warm wishes from friends and colleagues
           </p>
@@ -555,6 +561,24 @@ export default function Wellspring() {
     </div>
   );
 }
+const Sparkler = ({ style }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" style={{ position: "absolute", ...style, pointerEvents: "none" }}>
+    {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => (
+      <line
+        key={angle}
+        x1="12" y1="12" x2="20" y2="12"
+        stroke="#FFB800"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        style={{
+          transformOrigin: "12px 12px",
+          transform: `rotate(${angle}deg)`,
+          animation: `sparkleLine 0.8s ease-in-out ${i * 0.1}s infinite`,
+        }}
+      />
+    ))}
+  </svg>
+);
 
 const styles = {
   root: {
@@ -580,7 +604,7 @@ const styles = {
     animation: "float 4s ease-in-out infinite",
   },
   heroTitle: {
-    fontFamily: "'Playfair Display', serif",
+    fontFamily: "'Ultra', serif",
     fontSize: "clamp(32px, 7vw, 52px)",
     fontWeight: 900,
     color: "#2D2D2D",
@@ -588,7 +612,7 @@ const styles = {
     letterSpacing: "-0.02em",
   },
   heroName: {
-    fontFamily: "'Sacramento', cursive",
+    fontFamily: "'Delius Swash Caps', cursive",
     fontSize: "clamp(36px, 8vw, 64px)",
     color: "#50C878",
     marginTop: 4,

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { collection, addDoc, deleteDoc, updateDoc, doc, onSnapshot, query, orderBy } from "firebase/firestore";
 import { db } from "./firebase";
 
@@ -126,23 +126,87 @@ const ConfettiDots = () => {
   );
 };
 
-const SketchyBorder = ({ color }) => {
-  const points = [];
-  const steps = 40;
-  // Top
-  for (let i = 0; i <= steps; i++) points.push([(i / steps) * 100, Math.random() * 2 - 1]);
-  // Right
-  for (let i = 0; i <= steps; i++) points.push([100 + Math.random() * 2 - 1, (i / steps) * 100]);
-  // Bottom
-  for (let i = steps; i >= 0; i--) points.push([(i / steps) * 100, 100 + Math.random() * 2 - 1]);
-  // Left
-  for (let i = steps; i >= 0; i--) points.push([Math.random() * 2 - 1, (i / steps) * 100]);
+const Constellations = () => (
+  <svg style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 1, opacity: 0.25 }} preserveAspectRatio="xMidYMid slice" viewBox="0 0 1440 900">
+    {/* Aries */}
+    <g transform="translate(150, 200) scale(1.2)">
+      <circle cx="0" cy="40" r="2" fill={PALETTE.purple} />
+      <circle cx="30" cy="0" r="3" fill={PALETTE.purple} />
+      <circle cx="70" cy="15" r="2" fill={PALETTE.purple} />
+      <circle cx="100" cy="50" r="2" fill={PALETTE.purple} />
+      <path d="M0,40 L30,0 L70,15 L100,50" stroke={PALETTE.purple} fill="none" strokeWidth="1" strokeDasharray="3 5" />
+      <text x="30" y="-15" fill={PALETTE.purple} fontSize="8" fontFamily="Lexend" opacity="0.6" letterSpacing="2">ARIES</text>
+    </g>
 
-  const path = `M ${points.map(p => `${p[0]},${p[1]}`).join(" L ")} Z`;
-  
+    {/* Sagittarius */}
+    <g transform="translate(1100, 300) scale(1.2)">
+      <circle cx="0" cy="50" r="2" fill={PALETTE.blue} />
+      <circle cx="40" cy="0" r="2" fill={PALETTE.blue} />
+      <circle cx="100" cy="20" r="3" fill={PALETTE.blue} />
+      <circle cx="140" cy="70" r="2" fill={PALETTE.blue} />
+      <circle cx="110" cy="110" r="2" fill={PALETTE.blue} />
+      <circle cx="30" cy="110" r="2" fill={PALETTE.blue} />
+      <circle cx="-40" cy="30" r="2" fill={PALETTE.blue} />
+      <path d="M0,50 L40,0 L100,20 L140,70 L110,110 L30,110 Z" stroke={PALETTE.blue} fill="none" strokeWidth="1" strokeDasharray="3 5" />
+      <path d="M40,0 L-40,30 L0,50" stroke={PALETTE.blue} fill="none" strokeWidth="1" strokeDasharray="3 5" />
+      <text x="40" y="-20" fill={PALETTE.blue} fontSize="8" fontFamily="Lexend" opacity="0.6" letterSpacing="2">SAGITTARIUS</text>
+    </g>
+
+    {/* Virgo */}
+    <g transform="translate(300, 600) scale(1.2)">
+      <circle cx="0" cy="0" r="2" fill={PALETTE.coral} />
+      <circle cx="40" cy="50" r="2" fill={PALETTE.coral} />
+      <circle cx="100" cy="30" r="2" fill={PALETTE.coral} />
+      <circle cx="150" cy="100" r="3.5" fill={PALETTE.coral} />
+      <circle cx="80" cy="140" r="2" fill={PALETTE.coral} />
+      <circle cx="20" cy="120" r="2" fill={PALETTE.coral} />
+      <path d="M0,0 L40,50 L100,30 L150,100 L80,140 L20,120 L40,50" stroke={PALETTE.coral} fill="none" strokeWidth="1" strokeDasharray="3 5" />
+      <text x="40" y="-15" fill={PALETTE.coral} fontSize="8" fontFamily="Lexend" opacity="0.6" letterSpacing="2">VIRGO</text>
+    </g>
+  </svg>
+);
+
+const BORDER_COLORS = [PALETTE.lilac, PALETTE.coral, PALETTE.blue, PALETTE.magenta, PALETTE.purple, PALETTE.orange];
+
+const SketchyBorder = ({ seed, color }) => {
+  const [size, setSize] = useState({ w: 300, h: 400 });
+  const svgRef = useRef(null);
+
+  useEffect(() => {
+    if (!svgRef.current?.parentElement) return;
+    const observer = new ResizeObserver(entries => {
+      const { width, height } = entries[0].contentRect;
+      if (width > 0 && height > 0) setSize({ w: width, h: height });
+    });
+    observer.observe(svgRef.current.parentElement);
+    return () => observer.disconnect();
+  }, []);
+
+  const pathD = useMemo(() => {
+    let s = seed || 1;
+    const rng = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+    const random = (min, max) => min + rng() * (max - min);
+    
+    const step = 8;
+    const points = [];
+    const { w, h } = size;
+
+    for (let x = 0; x <= w; x += step) points.push([x + random(-1, 1), (x === 0 || x >= w) ? random(-3, 3) : random(-2.5, 2.5)]);
+    for (let y = step; y <= h; y += step) points.push([w + (y >= h ? random(-3, 3) : random(-2.5, 2.5)), y + random(-1, 1)]);
+    for (let x = w - step; x >= 0; x -= step) points.push([x + random(-1, 1), h + (x <= 0 ? random(-3, 3) : random(-2.5, 2.5))]);
+    for (let y = h - step; y > 0; y -= step) points.push([random(-2.5, 2.5), y + random(-1, 1)]);
+
+    return `M ${points.map(p => `${p[0]},${p[1]}`).join(" L ")} Z`;
+  }, [size, seed]);
+
   return (
-    <svg preserveAspectRatio="none" viewBox="-2 -2 104 104" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 10 }}>
-      <path d={path} fill="none" stroke={color} strokeWidth="1.5" opacity="0.3" strokeLinecap="round" />
+    <svg 
+      ref={svgRef}
+      preserveAspectRatio="none" 
+      viewBox={`-4 -4 ${size.w + 8} ${size.h + 8}`} 
+      style={{ position: "absolute", inset: "-4px", width: "calc(100% + 8px)", height: "calc(100% + 8px)", pointerEvents: "none", zIndex: 10 }}
+    >
+      <path d={pathD} fill="none" stroke={color} strokeWidth="1.6" opacity="0.3" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 };
@@ -182,6 +246,7 @@ export default function Wellspring() {
   const [heroAnimDone, setHeroAnimDone] = useState(false);
   const [myWishes, setMyWishes] = useState(() => JSON.parse(localStorage.getItem('myWishes') || '[]'));
   const [editingCardId, setEditingCardId] = useState(null);
+  const [lightboxMedia, setLightboxMedia] = useState(null);
   const fileInputRef = useRef(null);
 
 
@@ -362,7 +427,7 @@ export default function Wellspring() {
           50% { transform: translateY(-15px) rotate(5deg); }
         }
         @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(30px); }
+          from { opacity: 0; transform: translateY(28px); }
           to { opacity: 1; transform: translateY(0); }
         }
         @keyframes scaleIn {
@@ -487,27 +552,53 @@ export default function Wellspring() {
           pointer-events: none;
         }
 
-        .masonry-grid {
-          column-count: 3;
-          column-gap: 20px;
+        .cards-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 32px;
           width: 100%;
           max-width: 1100px;
           margin: 0 auto;
-          padding: 0 24px 40px;
+          padding: 0 24px 80px;
         }
-
-        @media (max-width: 900px) {
-          .masonry-grid { column-count: 2; }
+        .lightbox-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(30,30,46,0.85);
+          backdrop-filter: blur(12px);
+          z-index: 10000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: zoom-out;
+          animation: fadeIn 0.3s ease forwards;
         }
-        @media (max-width: 600px) {
-          .masonry-grid { column-count: 1; }
+        .lightbox-content {
+          max-width: 90vw;
+          max-height: 85vh;
+          object-fit: contain;
+          cursor: default;
+          animation: scaleIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
-
-        .masonry-item {
-          break-inside: avoid;
-          margin-bottom: 20px;
-          display: inline-block;
-          width: 100%;
+        .lightbox-close {
+          position: absolute;
+          top: 24px;
+          right: 24px;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: rgba(255,255,255,0.1);
+          color: white;
+          border: none;
+          font-size: 24px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background 0.2s;
+        }
+        .lightbox-close:hover {
+          background: rgba(255,255,255,0.2);
         }
 
         ::-webkit-scrollbar { width: 6px; }
@@ -541,6 +632,7 @@ export default function Wellspring() {
       <BrushStrokes />
       <SketchyMarks />
       <ConfettiDots />
+      <Constellations />
 
 
       {/* Hero Section */}
@@ -560,7 +652,7 @@ export default function Wellspring() {
             <Sparkler style={{ bottom: -10, left: "20%", transform: "scale(0.5)" }} />
             <Sparkler style={{ bottom: -5, right: "15%", transform: "scale(0.7) rotate(-10deg)" }} />
           </div>
-          
+
           <div style={styles.heroDivider}>
             <svg width="120" height="20" viewBox="0 0 120 20">
               <path d="M0,10 Q30,0 60,10 T120,10" fill="none" stroke={PALETTE.lilac} strokeWidth="1.5" />
@@ -571,7 +663,7 @@ export default function Wellspring() {
           </div>
 
           <p style={styles.heroSub}>warm wishes, gathered</p>
-          
+
           <div style={styles.heroCounter}>
             <span style={styles.countNum}>{cards.length}</span>
             <span style={styles.countLabel}>wishes</span>
@@ -598,19 +690,19 @@ export default function Wellspring() {
           <p style={{ color: PALETTE.textLight, marginTop: 8 }}>Be the first to leave a mark in the gallery.</p>
         </div>
       ) : (
-        <div className="masonry-grid" style={{ paddingBottom: 60 }}>
+        <div className="cards-grid">
           {cards.map((card, i) => (
             <div
               key={card.id}
-              className="card-item card-wrapper masonry-item"
-              style={{ 
-                ...styles.card, 
-                background: card.bg || CARD_COLORS[i % CARD_COLORS.length], 
-                animation: `fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) ${i * 0.07}s forwards`,
+              className="card-item card-wrapper"
+              style={{
+                ...styles.card,
+                background: card.bg || CARD_COLORS[i % CARD_COLORS.length],
+                animation: `fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) ${i * 0.07}s forwards`,
                 opacity: 0
               }}
             >
-              <SketchyBorder color={PALETTE.lilac} />
+              <SketchyBorder color={BORDER_COLORS[i % BORDER_COLORS.length]} seed={i + 1} />
 
               {/* Edit / Delete buttons */}
               {myWishes.includes(card.id) && (
@@ -620,39 +712,36 @@ export default function Wellspring() {
                 </div>
               )}
 
-              {/* Media Content */}
-              {card.sticker && <div style={{ fontSize: 42, textAlign: "center", margin: "32px 0 0" }}>{card.sticker}</div>}
+              {card.sticker && <div style={styles.cardSticker}>{card.sticker}</div>}
+              
               {(card.image || card.gif) && (
-                <div style={styles.cardImageWrap}>
+                <div style={styles.cardImageWrap} onClick={() => setLightboxMedia(card.image || card.gif)}>
                   <img src={card.image || card.gif} alt="" style={styles.cardImage} />
                 </div>
               )}
 
-              <div style={styles.cardBody}>
-                {card.message && <div style={styles.cardMessage}>“{card.message}”</div>}
-                
-                <div style={styles.cardFooter}>
-                  <div style={styles.cardAuthor}>— {card.author}</div>
-                  
-                  <div style={styles.reactionsRow}>
-                    {REACTIONS.map((r) => {
-                      const count = card.reactions?.[r.label] || 0;
-                      return (
-                        <button
-                          key={r.label}
-                          style={{
-                                ...styles.reactionBtn,
-                                ...(count > 0 ? styles.reactionBtnActive : {}),
-                          }}
-                          onClick={() => handleReaction(card.id, r.label)}
-                        >
-                          <span style={{ fontSize: 13 }}>{r.emoji}</span>
-                          <span style={styles.reactionCount}>{count}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+              {card.message && <div style={styles.cardMessage}>"{card.message}"</div>}
+
+              <div style={styles.cardAuthor}>— {card.author}</div>
+
+              <div style={styles.reactionsRow}>
+                {REACTIONS.map((r) => {
+                  const count = card.reactions?.[r.label] || 0;
+                  return (
+                    <button
+                      key={r.label}
+                      className="reaction-btn"
+                      style={{
+                        ...styles.reactionBtn,
+                        ...(count > 0 ? styles.reactionBtnActive : {}),
+                      }}
+                      onClick={() => handleReaction(card.id, r.label)}
+                    >
+                      <span style={{ fontSize: 13 }}>{r.emoji}</span>
+                      {count > 0 && <span style={styles.reactionCount}>{count}</span>}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           ))}
@@ -816,6 +905,12 @@ export default function Wellspring() {
           </div>
         </div>
       )}
+      {lightboxMedia && (
+        <div className="lightbox-overlay" onClick={() => setLightboxMedia(null)}>
+          <button className="lightbox-close" onClick={() => setLightboxMedia(null)}>×</button>
+          <img src={lightboxMedia} alt="Expanded view" className="lightbox-content" onClick={(e) => e.stopPropagation()} />
+        </div>
+      )}
 
       <footer style={styles.footer}>
         <div style={styles.footerDivider}>
@@ -875,7 +970,7 @@ const styles = {
     animation: "brushReveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards",
   },
   heroTitle: {
-    fontFamily: "'Playfair Display', serif",
+    fontFamily: "'Ultra', serif",
     fontSize: "clamp(42px, 8vw, 72px)",
     fontWeight: 900,
     color: PALETTE.text,
@@ -883,7 +978,7 @@ const styles = {
     margin: 0,
   },
   heroName: {
-    fontFamily: "'Caveat', cursive",
+    fontFamily: "'Delius Swash Caps', cursive",
     fontSize: "clamp(32px, 6vw, 48px)",
     color: PALETTE.purple,
     marginTop: 0,
@@ -945,18 +1040,18 @@ const styles = {
   },
   card: {
     borderRadius: 0,
-    padding: 0,
+    padding: "28px 24px 20px",
     position: "relative",
     border: "none",
-    boxShadow: "0 10px 40px rgba(0,0,0,0.04)",
-    transition: "all 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
+    boxShadow: "none",
+    transition: "transform 0.35s",
     cursor: "default",
-    overflow: "visible", // To show the sketchy border
+    overflow: "visible",
     zIndex: 2,
     display: "flex",
     flexDirection: "column",
     width: "100%",
-    minHeight: 180,
+    height: "auto",
   },
   cardControls: {
     position: "absolute",
@@ -981,76 +1076,65 @@ const styles = {
     transition: "all 0.2s",
     boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
   },
+  cardSticker: {
+    fontSize: 36,
+    textAlign: "center",
+    marginBottom: 16,
+  },
   cardImageWrap: {
     borderRadius: 0,
     overflow: "hidden",
-    background: "rgba(0,0,0,0.02)",
     flexShrink: 0,
     width: "100%",
+    marginBottom: 16,
+    border: "1px solid rgba(107,76,138,0.08)",
+    cursor: "zoom-in",
   },
   cardImage: {
     width: "100%",
     display: "block",
-    maxHeight: 400,
-    objectFit: "contain",
-  },
-  cardBody: {
-    padding: "32px 24px 24px",
-    display: "flex",
-    flexDirection: "column",
-    flexGrow: 1,
-    position: "relative",
+    maxHeight: 200,
+    objectFit: "cover",
   },
   cardMessage: {
     fontFamily: "'Quicksand', sans-serif",
-    fontSize: 17,
-    fontStyle: "italic",
-    lineHeight: 1.7,
-    color: PALETTE.text,
-    marginBottom: 20,
-    flexGrow: 1,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    textAlign: "center",
-  },
-  cardFooter: {
-    marginTop: "auto",
-    textAlign: "center",
+    fontSize: 16,
+    lineHeight: 1.75,
+    color: "#1E1E2E",
+    marginBottom: 16,
   },
   cardAuthor: {
-    fontFamily: "'Caveat', cursive",
-    fontSize: 19,
-    color: PALETTE.purple,
-    marginBottom: 16,
-    fontWeight: 400,
+    fontFamily: "'Delius', cursive",
+    fontSize: 18,
+    color: "#6B4C8A",
+    marginBottom: 20,
   },
   reactionsRow: {
     display: "flex",
     gap: 8,
-    justifyContent: "center",
     flexWrap: "wrap",
+    marginTop: "auto",
   },
   reactionBtn: {
     display: "inline-flex",
     alignItems: "center",
     gap: 4,
-    padding: "4px 10px",
+    padding: "3px 8px",
     borderRadius: 0,
-    border: "1px solid #F0F0F0",
+    border: "1px solid rgba(107,76,138,0.08)",
     background: "transparent",
     cursor: "pointer",
     fontSize: 14,
     transition: "all 0.2s cubic-bezier(0.22, 1, 0.36, 1)",
   },
   reactionBtnActive: {
-    background: "rgba(107, 76, 138, 0.05)",
-    borderColor: PALETTE.lilac,
+    background: "rgba(107,76,138,0.06)",
+    borderColor: "rgba(107,76,138,0.25)",
   },
   reactionCount: {
     fontSize: 11,
     fontWeight: 700,
-    color: PALETTE.purple,
+    color: "#6B4C8A",
   },
   overlay: {
     position: "fixed",
