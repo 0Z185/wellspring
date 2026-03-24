@@ -403,13 +403,23 @@ export default function Wellspring() {
                     onChange={handleImageUpload}
                   />
                 </div>
+                <div style={{ marginTop: 16 }}>
+                  <label style={styles.label}>Message (Optional)</label>
+                  <textarea
+                    style={{ ...styles.textarea, minHeight: 60 }}
+                    rows="2"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Add a caption to your photo..."
+                  />
+                </div>
               </div>
             )}
 
             {activeTab === "gif" && (
               <div style={styles.fieldGroup}>
                 <label style={styles.label}>Choose a GIF</label>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }} className="gif-grid">
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 16 }} className="gif-grid">
                   {GIPHY_SUGGESTIONS.map((url) => (
                     <img
                       key={url}
@@ -427,13 +437,23 @@ export default function Wellspring() {
                     />
                   ))}
                 </div>
+                <div>
+                  <label style={styles.label}>Message (Optional)</label>
+                  <textarea
+                    style={{ ...styles.textarea, minHeight: 60 }}
+                    rows="2"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Add a caption to your GIF..."
+                  />
+                </div>
               </div>
             )}
 
             {activeTab === "sticker" && (
               <div style={styles.fieldGroup}>
                 <label style={styles.label}>Choose a sticker</label>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 15 }} className="sticker-grid">
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 15, marginBottom: 16 }} className="sticker-grid">
                   {STICKERS.map((s) => (
                     <button
                       key={s}
@@ -450,6 +470,16 @@ export default function Wellspring() {
                       {s}
                     </button>
                   ))}
+                </div>
+                <div>
+                  <label style={styles.label}>Message (Optional)</label>
+                  <textarea
+                    style={{ ...styles.textarea, minHeight: 60 }}
+                    rows="2"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Add a caption to your sticker..."
+                  />
                 </div>
               </div>
             )}
