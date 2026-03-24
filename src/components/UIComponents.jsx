@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, memo } from "react";
 
-export const SketchyBorder = ({ seed, color }) => {
+export const SketchyBorder = memo(({ seed, color }) => {
   const [size, setSize] = useState({ w: 300, h: 400 });
   const svgRef = useRef(null);
 
@@ -41,9 +41,9 @@ export const SketchyBorder = ({ seed, color }) => {
       <path d={pathD} fill="none" stroke={color} strokeWidth="1.6" opacity="0.3" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
-};
+});
 
-export const Sparkler = ({ style }) => (
+export const Sparkler = memo(({ style }) => (
   <svg width="24" height="24" viewBox="0 0 24 24" style={{ position: "absolute", ...style, pointerEvents: "none" }}>
     {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => (
       <line
@@ -52,12 +52,13 @@ export const Sparkler = ({ style }) => (
         stroke="#FFB800"
         strokeWidth="1.5"
         strokeLinecap="round"
+        className="sparkle-line"
         style={{
           transformOrigin: "12px 12px",
-          transform: `rotate(${angle}deg)`,
+          "--angle": `${angle}deg`,
           animation: `sparkleLine 0.8s ease-in-out ${i * 0.1}s infinite`,
         }}
       />
     ))}
   </svg>
-);
+));

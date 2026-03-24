@@ -13,6 +13,7 @@ body { overflow-x: hidden; width: 100%; }
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50% { transform: translateY(-15px) rotate(5deg); }
 }
+.floating-emoji { will-change: transform; }
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(28px); }
   to { opacity: 1; transform: translateY(0); }
@@ -27,6 +28,7 @@ body { overflow-x: hidden; width: 100%; }
 }
 @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
 @keyframes scalePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+.confetti-dot { will-change: transform; }
 @keyframes shimmer {
   0% { background-position: -200% center; }
   100% { background-position: 200% center; }
@@ -57,6 +59,7 @@ body { overflow-x: hidden; width: 100%; }
   0%, 100% { opacity: 0.3; }
   50% { opacity: 1; }
 }
+.star-circle { will-change: opacity; }
 @keyframes starGlow {
   0%, 100% { opacity: 0.5; }
   50% { opacity: 1; }
@@ -65,6 +68,7 @@ body { overflow-x: hidden; width: 100%; }
   0%, 100% { opacity: 0; transform: scale(0.6) rotate(var(--angle)); }
   50% { opacity: 1; transform: scale(1.1) rotate(var(--angle)); }
 }
+.sparkle-line { will-change: transform, opacity; }
 @keyframes lineShimmer {
   0%, 100% { opacity: 0.3; }
   50% { opacity: 0.7; }
@@ -77,6 +81,7 @@ body { overflow-x: hidden; width: 100%; }
 .card-item {
   animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   opacity: 0;
+  transform: translateZ(0);
 }
 
 .add-btn { 
@@ -152,7 +157,10 @@ body { overflow-x: hidden; width: 100%; }
   opacity: 1;
   z-index: 1;
   pointer-events: none;
+  transform: translateZ(0);
 }
+
+.brush-layer { filter: url(#roughen); }
 
 .cards-grid {
   display: grid;
@@ -237,8 +245,11 @@ body { overflow-x: hidden; width: 100%; }
   }
   .lightbox-content { max-width: 94vw; }
   
-  /* Canvas grain opacity reduced for performance */
-  svg > rect[filter="url(#noiseFilter)"] { opacity: 0.5; }
+  /* Canvas grain workaround for mobile */
+  .noise-layer { opacity: 0.2; }
+  
+  /* Disable heavy filters on mobile */
+  #distort, #roughen, #starGlow, .brush-layer { filter: none !important; display: none !important; }
 }
 
 @media (max-width: 380px) {

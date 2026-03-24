@@ -19,24 +19,18 @@ import {
   Constellations 
 } from "./components/BackgroundArt";
 import { SketchyBorder, Sparkler } from "./components/UIComponents";
+import AddWishModal from "./components/AddWishModal";
 import { styles } from "./Wellspring.styles";
 
 export default function Wellspring() {
   const [cards, setCards] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [authorName, setAuthorName] = useState("");
-  const [message, setMessage] = useState("");
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [selectedGif, setSelectedGif] = useState(null);
-  const [selectedSticker, setSelectedSticker] = useState(null);
-  const [activeTab, setActiveTab] = useState("message");
   const [loading, setLoading] = useState(true);
   const [confetti, setConfetti] = useState([]);
   const [heroAnimDone, setHeroAnimDone] = useState(false);
   const [myWishes, setMyWishes] = useState(() => JSON.parse(localStorage.getItem('myWishes') || '[]'));
-  const [editingCardId, setEditingCardId] = useState(null);
+  const [editingCard, setEditingCard] = useState(null);
   const [lightboxMedia, setLightboxMedia] = useState(null);
-  const fileInputRef = useRef(null);
 
 
   // Load cards from Firestore
@@ -68,12 +62,12 @@ export default function Wellspring() {
     setTimeout(() => setConfetti([]), 5000);
   };
 
-  const handleAddCard = async () => {
+  const handleAddCardData = async (data) => {
+    const { authorName, message, selectedImage, selectedGif, selectedSticker } = data;
     if (!authorName.trim()) return;
-    if (!message.trim() && !selectedImage && !selectedGif && !selectedSticker) return;
 
     try {
-      if (editingCardId) {
+      if (editingCard) {
         const updateData = {
           author: authorName.trim(),
           message: message.trim(),
@@ -81,7 +75,7 @@ export default function Wellspring() {
           gif: selectedGif,
           sticker: selectedSticker,
         };
-        await updateDoc(doc(db, "wishes", editingCardId), updateData);
+        await updateDoc(doc(db, "wishes", editingCard.id), updateData);
       } else {
         const newCard = {
           author: authorName.trim(),
@@ -98,38 +92,18 @@ export default function Wellspring() {
         const newMyWishes = [...myWishes, docRef.id];
         setMyWishes(newMyWishes);
         localStorage.setItem("myWishes", JSON.stringify(newMyWishes));
+        launchConfetti();
       }
 
       setShowAddModal(false);
-      resetForm();
-      if (!editingCardId) launchConfetti();
+      setEditingCard(null);
     } catch (e) {
-      console.error("Error saving document: ", e);
-      alert("Uh oh, the post failed to save. Error: " + e.message);
+      console.error("Error saving wish:", e);
     }
   };
 
-  const resetForm = () => {
-    setAuthorName("");
-    setMessage("");
-    setSelectedImage(null);
-    setSelectedGif(null);
-    setSelectedSticker(null);
-    setActiveTab("message");
-    setEditingCardId(null);
-  };
-
   const handleEditClick = (card) => {
-    setEditingCardId(card.id);
-    setAuthorName(card.author);
-    setMessage(card.message || "");
-    setSelectedImage(card.image || null);
-    setSelectedGif(card.gif || null);
-    setSelectedSticker(card.sticker || null);
-    if (card.image) setActiveTab("photo");
-    else if (card.gif) setActiveTab("gif");
-    else if (card.sticker) setActiveTab("sticker");
-    else setActiveTab("message");
+    setEditingCard(card);
     setShowAddModal(true);
   };
 
@@ -147,49 +121,6 @@ export default function Wellspring() {
     }
   };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let width = img.width;
-        let height = img.height;
-
-        const MAX_WIDTH = 800;
-        const MAX_HEIGHT = 800;
-
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height = Math.round((height * MAX_WIDTH) / width);
-            width = MAX_WIDTH;
-          }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width = Math.round((width * MAX_HEIGHT) / height);
-            height = MAX_HEIGHT;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-        const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
-
-        if (dataUrl.length > 1000000) {
-          alert("Image is still too large after compression. Please choose a smaller photo.");
-          return;
-        }
-        setSelectedImage(dataUrl);
-      };
-      img.src = ev.target.result;
-    };
-    reader.readAsDataURL(file);
-  };
 
   const handleDeleteCard = async (cardId) => {
     try {
@@ -228,7 +159,25 @@ export default function Wellspring() {
       <ConfettiDots />
       <Constellations />
 
-
+      {/* Floating decorative elements */}
+      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, pointerEvents: "none", overflow: "hidden", zIndex: 0 }}>
+        {["🎈", "🎁", "✨", "🎂", "💖", "🎊"].map((emoji, i) => (
+          <div
+            key={i}
+            className="floating-emoji"
+            style={{
+              position: "absolute",
+              fontSize: 20 + Math.random() * 16,
+              top: `${10 + Math.random() * 80}%`,
+              left: `${5 + Math.random() * 90}%`,
+              animation: `float ${3 + Math.random() * 3}s ${Math.random() * 2}s ease-in-out infinite`,
+              opacity: 0.15,
+            }}
+          >
+            {emoji}
+          </div>
+        ))}
+      </div>
       {/* Hero Section */}
       <div className="hero-section" style={styles.hero}>
         <div className="hero-inner" style={styles.heroInner}>
@@ -341,154 +290,14 @@ export default function Wellspring() {
 
       {/* Add Modal */}
       {showAddModal && (
-        <div className="modal-overlay" style={styles.overlay} onClick={() => setShowAddModal(false)}>
-          <div className="modal-content" style={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <button className="close-btn" style={styles.closeBtn} onClick={() => setShowAddModal(false)}>&times;</button>
-            
-            <header style={styles.modalHeader}>
-              <h2 style={styles.modalTitle}>{editingCardId ? "Refine your wish" : "Leave a wish"}</h2>
-            </header>
-
-            <nav style={styles.tabNav}>
-              {["message", "photo", "gif", "sticker"].map((tab) => (
-                <button
-                  key={tab}
-                  className="tab-btn"
-                  style={{ ...styles.tabBtn, ...(activeTab === tab ? styles.tabBtnActive : {}) }}
-                  onClick={() => setActiveTab(tab)}
-                >
-                  {tab}
-                  {activeTab === tab && <div style={styles.tabUnderline} />}
-                </button>
-              ))}
-            </nav>
-
-            <div style={styles.fieldGroup}>
-              <label style={styles.label}>Your Name</label>
-              <input
-                style={styles.input}
-                value={authorName}
-                onChange={(e) => setAuthorName(e.target.value)}
-                placeholder="How should they address you?"
-              />
-            </div>
-
-            {activeTab === "message" && (
-              <div style={styles.fieldGroup}>
-                <label style={styles.label}>Your Message</label>
-                <textarea
-                  style={styles.textarea}
-                  rows="4"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Share a memory, a joke, or a warm thought..."
-                />
-              </div>
-            )}
-
-            {activeTab === "photo" && (
-              <div style={styles.fieldGroup}>
-                <label style={styles.label}>Upload image</label>
-                <div style={styles.uploadArea} onClick={() => fileInputRef.current.click()}>
-                  {selectedImage ? (
-                    <img src={selectedImage} alt="Preview" style={{ maxWidth: "100%", maxHeight: 150 }} />
-                  ) : (
-                    <div>Click to select a photo</div>
-                  )}
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    style={{ display: "none" }}
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                  />
-                </div>
-                <div style={{ marginTop: 16 }}>
-                  <label style={styles.label}>Message (Optional)</label>
-                  <textarea
-                    style={{ ...styles.textarea, minHeight: 60 }}
-                    rows="2"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Add a caption to your photo..."
-                  />
-                </div>
-              </div>
-            )}
-
-            {activeTab === "gif" && (
-              <div style={styles.fieldGroup}>
-                <label style={styles.label}>Choose a GIF</label>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 16 }} className="gif-grid">
-                  {GIPHY_SUGGESTIONS.map((url) => (
-                    <img
-                      key={url}
-                      src={url}
-                      className="gif-item"
-                      alt="Giphy suggestion"
-                      style={{
-                        width: "100%",
-                        aspectRatio: "1/1",
-                        objectFit: "cover",
-                        cursor: "pointer",
-                        border: selectedGif === url ? `3px solid ${PALETTE.coral}` : "none"
-                      }}
-                      onClick={() => setSelectedGif(url)}
-                    />
-                  ))}
-                </div>
-                <div>
-                  <label style={styles.label}>Message (Optional)</label>
-                  <textarea
-                    style={{ ...styles.textarea, minHeight: 60 }}
-                    rows="2"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Add a caption to your GIF..."
-                  />
-                </div>
-              </div>
-            )}
-
-            {activeTab === "sticker" && (
-              <div style={styles.fieldGroup}>
-                <label style={styles.label}>Choose a sticker</label>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 15, marginBottom: 16 }} className="sticker-grid">
-                  {STICKERS.map((s) => (
-                    <button
-                      key={s}
-                      className="sticker-btn"
-                      style={{
-                        fontSize: 28,
-                        background: "none",
-                        border: selectedSticker === s ? `2px solid ${PALETTE.coral}` : "none",
-                        cursor: "pointer",
-                        borderRadius: 8
-                      }}
-                      onClick={() => setSelectedSticker(s)}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-                <div>
-                  <label style={styles.label}>Message (Optional)</label>
-                  <textarea
-                    style={{ ...styles.textarea, minHeight: 60 }}
-                    rows="2"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Add a caption to your sticker..."
-                  />
-                </div>
-              </div>
-            )}
-
-            <button style={styles.submitBtn} className="submit-btn" onClick={handleAddCard}>
-              {editingCardId ? "Save Changes" : "Post to Board"}
-            </button>
-          </div>
-        </div>
+        <AddWishModal 
+          editingCard={editingCard} 
+          onAdd={handleAddCardData} 
+          onClose={() => {
+            setShowAddModal(false);
+            setEditingCard(null);
+          }} 
+        />
       )}
       {lightboxMedia && (
         <div className="lightbox-overlay" onClick={() => setLightboxMedia(null)}>
