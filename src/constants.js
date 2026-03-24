@@ -10,6 +10,11 @@ export const GIPHY_SUGGESTIONS = [
   "https://media.giphy.com/media/KZG3HjhDZPiMGkh3xm/giphy.gif",
   "https://media.giphy.com/media/ljuS6Mgn52ek8/giphy.gif",
   "https://media.giphy.com/media/yoJC2GnSClbPOkV0eA/giphy.gif",
+  "https://media.giphy.com/media/3o7TKVUn7XYMdtqa6A/giphy.gif",
+  "https://media.giphy.com/media/l4Kma88F3A66B9uPm/giphy.gif",
+  "https://media.giphy.com/media/Xoyp6jhTZ6YVatscL5/giphy.gif",
+  "https://media.giphy.com/media/3o7TKy7L1tPeyf7K2A/giphy.gif",
+  "https://media.giphy.com/media/l0MYIIDJz32rZ7gE0/giphy.gif",
 ];
 
 export const STICKERS = ["🎂", "🎁", "🎈", "🎉", "🥳", "💐", "🌟", "💖", "🍰", "🎊", "✨", "🪅"];
