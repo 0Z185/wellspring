@@ -111,6 +111,16 @@ export const styles = {
     overflow: "hidden",
     zIndex: 10,
   },
+  celebrationDate: {
+    fontSize: 12,
+    textTransform: "uppercase",
+    letterSpacing: "0.2em",
+    color: PALETTE.textLight,
+    textAlign: "center",
+    marginBottom: 12,
+    fontWeight: 500,
+    opacity: 0.8,
+  },
   grid: {
     // Legacy styles, now handled by .masonry-grid class
   },

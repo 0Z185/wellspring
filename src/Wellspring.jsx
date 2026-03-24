@@ -215,6 +215,7 @@ export default function Wellspring() {
       </div>
 
       {/* Add Button */}
+      <div style={styles.celebrationDate}>April 3rd</div>
       <button className="add-btn" style={styles.addBtn} onClick={() => setShowAddModal(true)}>
         <span style={{ fontSize: 22 }}>+</span>
         <span>Add to Board</span>
